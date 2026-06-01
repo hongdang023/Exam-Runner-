@@ -8469,10 +8469,19 @@ window.removeHighlight = function(passageKey, index, e) {
         const passageEl = document.getElementById(elementId);
         if (passageEl) {
             let rawText = '';
-            EXAM_RUNNERS_DB.exams.forEach(ex => {
-                const q = ex.questions.find(q => 'passage-' + q.id === passageKey);
+            if (AppState.activeExam && AppState.activeExam.questions) {
+                const q = AppState.activeExam.questions.find(q => 'passage-' + q.id === passageKey);
                 if (q) rawText = q.passage;
-            });
+            }
+            if (!rawText) {
+                for (const ex of EXAM_RUNNERS_DB.exams) {
+                    const q = ex.questions.find(q => 'passage-' + q.id === passageKey);
+                    if (q) {
+                        rawText = q.passage;
+                        break;
+                    }
+                }
+            }
             if (rawText) {
                 passageEl.innerHTML = applyHighlightsToPassage(rawText, passageKey);
             }
