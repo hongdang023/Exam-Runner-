@@ -58,12 +58,89 @@ document.addEventListener('DOMContentLoaded', () => {
     initSidebarToggle(); // Initialize collapsible sidebar
     renderNavigation();
     initOnboarding();
+    initProfileEdit();
+    renderSidebarProfile();
     navigateTab('dashboard'); // Default landing page
     
     // Quick streak and counts update
     document.getElementById('streak-count').innerText = `${AppState.streak} ngày`;
     saveAppStateToLocalStorage();
 });
+
+// --- SIDEBAR PROFILE & EDIT ---
+function renderSidebarProfile() {
+    const nameEl = document.getElementById('sidebar-user-name');
+    const initialEl = document.getElementById('sidebar-avatar-initial');
+    if (!nameEl || !initialEl) return;
+
+    if (AppState.studentName) {
+        nameEl.innerText = AppState.studentName;
+        initialEl.innerText = AppState.studentName.charAt(0).toUpperCase();
+    } else {
+        nameEl.innerText = "Học viên mới";
+        initialEl.innerText = "?";
+    }
+}
+
+function initProfileEdit() {
+    const profileBtn = document.getElementById('sidebar-profile-btn');
+    const profileModal = document.getElementById('profile-edit-modal');
+    const saveBtn = document.getElementById('prof-save-btn');
+    if (!profileBtn || !profileModal || !saveBtn) return;
+
+    profileBtn.addEventListener('click', () => {
+        // Pre-fill
+        document.getElementById('prof-student-name').value = AppState.studentName || '';
+        document.getElementById('prof-parent-name').value = AppState.parentName || '';
+        document.getElementById('prof-school').value = AppState.school || '';
+        document.getElementById('prof-class').value = AppState.className || '';
+        document.getElementById('prof-exam-date').value = AppState.examDate || '';
+        if (AppState.scoreGoal) document.getElementById('prof-score-goal').value = AppState.scoreGoal;
+        if (AppState.weeklyCommitment) document.getElementById('prof-commitment').value = AppState.weeklyCommitment;
+        
+        profileModal.classList.add('open');
+    });
+
+    saveBtn.addEventListener('click', () => {
+        const sName = document.getElementById('prof-student-name').value.trim();
+        const pName = document.getElementById('prof-parent-name').value.trim();
+        
+        if (!sName || !pName) {
+            alert('Vui lòng nhập Tên của Học sinh và Phụ huynh!');
+            return;
+        }
+
+        AppState.studentName = sName;
+        AppState.parentName = pName;
+        AppState.school = document.getElementById('prof-school').value.trim();
+        AppState.className = document.getElementById('prof-class').value.trim();
+        AppState.examDate = document.getElementById('prof-exam-date').value;
+        AppState.scoreGoal = document.getElementById('prof-score-goal').value;
+        AppState.weeklyCommitment = document.getElementById('prof-commitment').value;
+
+        saveAppStateToLocalStorage();
+        renderSidebarProfile();
+        
+        // Refresh dashboard if active
+        if (AppState.currentTab === 'dashboard') {
+            const viewport = document.getElementById('app-viewport');
+            if (AppState.currentRole === 'student') renderDashboard(viewport);
+            if (AppState.currentRole === 'parent') renderParentDashboard(viewport);
+            
+            const pageSubtitle = document.getElementById('page-subtitle');
+            if (pageSubtitle) {
+                if (AppState.currentRole === 'parent') {
+                    pageSubtitle.innerText = `Kính gửi Phụ huynh ${AppState.parentName || ''}. Báo cáo tóm tắt tiến độ tự học của con.`;
+                } else {
+                    pageSubtitle.innerText = `Chào mừng ${AppState.studentName} quay lại hành trình rèn luyện hôm nay!`;
+                }
+            }
+        }
+        
+        profileModal.classList.remove('open');
+        triggerConfetti(); // Little reward for updating profile
+    });
+}
 
 // --- SIDEBAR TOGGLE (Collapsible Navbar) ---
 function initSidebarToggle() {
@@ -425,7 +502,8 @@ function renderNavigation() {
             { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard', subtitle: 'Nhiệm vụ hôm nay' },
             { id: 'practice', label: 'Phòng Luyện Đề', icon: 'pencil-line', subtitle: 'Luyện đề thi thử' },
             { id: 'flashcards', label: 'Flashcard Desk', icon: 'layers', subtitle: 'Ghi nhớ từ vựng' },
-            { id: 'grammar', label: 'Grammar Shelf', icon: 'book-open', subtitle: 'Lý thuyết cốt lõi' }
+            { id: 'grammar', label: 'Grammar Shelf', icon: 'book-open', subtitle: 'Lý thuyết cốt lõi' },
+            { id: 'skillmap', label: 'Bản Đồ Năng Lực', icon: 'map', subtitle: 'Phân tích chi tiết' }
         ];
     } else if (AppState.currentRole === 'parent') {
         navStructure = [
@@ -485,26 +563,14 @@ function navigateTab(tabId) {
     switch(tabId) {
         case 'dashboard':
             pageTitle.innerText = "Dashboard";
-            pageSubtitle.innerText = "Chào mừng bạn quay lại hành trình rèn luyện hôm nay!";
+            const greetingName = AppState.studentName ? AppState.studentName : "bạn";
+            pageSubtitle.innerText = `Chào mừng ${greetingName} quay lại hành trình rèn luyện hôm nay!`;
             renderDashboard(viewport);
             break;
         case 'skillmap':
-            AppState.currentTab = 'dashboard';
-            // Update active nav-link classes
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === '#dashboard') {
-                    link.classList.add('active');
-                }
-            });
-            pageTitle.innerText = "Dashboard";
-            pageSubtitle.innerText = "Chào mừng bạn quay lại hành trình rèn luyện hôm nay!";
-            renderDashboard(viewport);
-            setTimeout(() => {
-                const el = document.getElementById('dashboard-skillmap-section');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
+            pageTitle.innerText = "Bản Đồ Năng Lực Chi Tiết";
+            pageSubtitle.innerText = "Phân tích chi tiết và hành động rèn luyện đề xuất";
+            renderSkillMap(viewport);
             break;
         case 'practice':
             pageTitle.innerText = "Phòng Luyện Đề";
@@ -523,7 +589,8 @@ function navigateTab(tabId) {
             break;
         case 'progress':
             pageTitle.innerText = "Góc Phụ Huynh";
-            pageSubtitle.innerText = "Theo dõi tình hình sức khỏe học tập và tiến trình luyện đề của con (Chỉ xem).";
+            const parentNameText = AppState.parentName ? `Kính gửi Phụ huynh ${AppState.parentName}. ` : "";
+            pageSubtitle.innerText = `${parentNameText}Báo cáo tóm tắt tiến độ tự học của ${AppState.studentName || 'con'}.`;
             renderParentHub(viewport);
             break;
         case 'vault':
@@ -549,151 +616,205 @@ function navigateTab(tabId) {
 
 // --- A. STUDENT DASHBOARD PAGE ---
 function renderDashboard(container) {
-    // Determine ONE hero task for today (Priority: Adaptive → Next Exam → Review)
     const weaknessCount = AppState.weaknesses ? AppState.weaknesses.length : 0;
-    let heroTask;
+    const topTasks = [];
 
+    // Task 1: Exam / Adaptive Practice
     if (weaknessCount > 0) {
-        heroTask = {
+        topTasks.push({
+            id: 'task-adaptive',
             type: 'adaptive',
-            examId: null,
             icon: '🎯',
-            tag: `ADAPTIVE · ${weaknessCount} CÂU CẦN ÔN`,
+            tag: 'Luyện Đề · Vá Lỗi Sai',
             title: 'Khắc Phục Điểm Yếu',
-            desc: `Có ${weaknessCount} câu hỏi sai đang chờ bạn ôn luyện lại. Đây là cách hiệu quả nhất để vá lỗ hổng kiến thức trước kỳ thi.`,
+            desc: `Có ${weaknessCount} câu hỏi sai đang chờ bạn ôn luyện lại. Xử lý ngay để tránh lặp lại lỗi sai.`,
             btnText: 'Luyện Ngay',
             accentColor: 'var(--color-danger)',
-            accentBg: 'var(--color-danger-light)',
-            accentBorder: 'rgba(211,47,47,0.22)',
-            btnStyle: 'background:var(--color-danger); border-color:var(--color-danger); box-shadow:0 4px 14px rgba(211,47,47,0.3);',
-            skills: ['Ngữ Pháp', 'Từ Vựng', 'Đọc Điền Từ'],
-            xpReward: '+150 XP',
-            streakReward: '+1 Ngày',
-            checklist: [
-                { text: 'Điểm danh học tập hôm nay', done: true },
-                { text: 'Ôn tập lỗi sai và củng cố ngữ pháp', done: false },
-                { text: 'Đạt độ chính xác >= 80% trong bài retry', done: false }
-            ]
-        };
+            iconColor: 'var(--color-danger)'
+        });
     } else {
         const nextExam = EXAM_RUNNERS_DB.exams ? EXAM_RUNNERS_DB.exams.find(e =>
             AppState.completedExams[e.id] === undefined &&
             (e.id === 1 || (AppState.completedExams[e.id - 1] !== undefined && AppState.completedExams[e.id - 1] >= 80))
         ) : null;
         if (nextExam) {
-            heroTask = {
+            topTasks.push({
+                id: 'task-exam',
                 type: 'exam',
                 examId: nextExam.id,
                 icon: '📝',
-                tag: `ĐỀ SỐ ${nextExam.id} · ${nextExam.difficulty}`,
+                tag: 'Luyện Đề · Đề Mới',
                 title: nextExam.title,
-                desc: `${nextExam.questionsCount} câu · ${nextExam.duration} phút · Nhận +${nextExam.xpReward} XP khi đạt ≥ 80%.`,
-                btnText: 'Bắt Đầu',
+                desc: `${nextExam.questionsCount} câu hỏi bám sát cấu trúc đề thi thật của Sở GD&ĐT.`,
+                btnText: 'Bắt Đầu Thi',
                 accentColor: 'var(--color-commitment)',
-                accentBg: 'rgba(255,111,0,0.07)',
-                accentBorder: 'rgba(255,111,0,0.22)',
-                btnStyle: '',
-                skills: ['Toàn diện Đề thi', 'Phát Âm', 'Ngữ Pháp'],
-                xpReward: `+${nextExam.xpReward} XP`,
-                streakReward: '+1 Ngày',
-                checklist: [
-                    { text: 'Điểm danh học tập hôm nay', done: true },
-                    { text: `Hoàn thành Đề thi số ${nextExam.id}`, done: false },
-                    { text: 'Đọc kỹ giải thích chi tiết sau thi', done: false }
-                ]
-            };
+                iconColor: 'var(--color-commitment)'
+            });
         } else {
             const completedIds = Object.keys(AppState.completedExams || {}).map(Number);
             const lastId = completedIds.length > 0 ? Math.max(...completedIds) : 1;
-            heroTask = {
+            topTasks.push({
+                id: 'task-review',
                 type: 'review',
                 examId: lastId,
                 icon: '🔁',
-                tag: 'ÔN TẬP · DUY TRÌ PHONG ĐỘ',
+                tag: 'Luyện Đề · Ôn Tập',
                 title: 'Ôn lại bài thi gần nhất',
-                desc: `Đề số ${lastId} — Điểm đạt: ${AppState.completedExams[lastId] || 0}%. Luyện lại để củng cố phản xạ thi cử trước ngày thi.`,
+                desc: `Đề số ${lastId} — Điểm đạt: ${AppState.completedExams[lastId] || 0}%. Duy trì phản xạ đề thi.`,
                 btnText: 'Ôn Lại',
                 accentColor: 'var(--color-interactive)',
-                accentBg: 'rgba(0,176,255,0.07)',
-                accentBorder: 'rgba(0,176,255,0.22)',
-                btnStyle: '',
-                skills: ['Củng cố Lỗi sai', 'Phản xạ Phòng thi', 'Thời gian thi'],
-                xpReward: '+100 XP',
-                streakReward: '+1 Ngày',
-                checklist: [
-                    { text: 'Điểm danh học tập hôm nay', done: true },
-                    { text: `Xem lại lịch sử thi Đề số ${lastId}`, done: false },
-                    { text: 'Luyện tập bổ trợ kỹ năng còn yếu', done: false }
-                ]
-            };
+                iconColor: 'var(--color-interactive)'
+            });
         }
     }
 
+    // Task 2: Flashcards (Vocabulary)
+    const flashcardCount = AppState.flashcards ? AppState.flashcards.length : 0;
+    const dueFlashcards = 15; // Placeholder for SR logic
+    topTasks.push({
+        id: 'task-vocab',
+        type: 'flashcards',
+        icon: '🗂️',
+        tag: 'Từ Vựng · Cần Ôn Tập',
+        title: 'Ôn Tập Flashcards',
+        desc: `Bạn có ${dueFlashcards} từ vựng đến hạn cần ôn tập để đưa vào trí nhớ dài hạn.`,
+        btnText: 'Lật Thẻ Ngay',
+        accentColor: 'var(--color-discovery)',
+        iconColor: 'var(--color-discovery)'
+    });
+
+    // Task 3: Grammar
+    const grammarMap = {
+        tense: 'Thì động từ', passive: 'Câu bị động', conditional: 'Câu điều kiện',
+        comparison: 'Câu so sánh', relative: 'Mệnh đề quan hệ', gerund: 'Danh/Động từ',
+        connectors: 'Từ nối', reported_speech: 'Câu gián tiếp', word_form: 'Cấu tạo từ', phrasal_verb: 'Cụm động từ'
+    };
+    let weakestTopic = 'tense';
+    let lowestScore = 100;
+    if (AppState.grammarMastery) {
+        for (const [key, score] of Object.entries(AppState.grammarMastery)) {
+            if (score < lowestScore) {
+                lowestScore = score;
+                weakestTopic = key;
+            }
+        }
+    }
+    const topicName = grammarMap[weakestTopic] || 'Thì động từ';
+    topTasks.push({
+        id: 'task-grammar',
+        type: 'grammar',
+        icon: '📚',
+        tag: 'Ngữ Pháp · Cần Cải Thiện',
+        title: `Củng cố: ${topicName}`,
+        desc: `Mức độ thành thạo hiện tại: ${lowestScore}%. Ôn lại lý thuyết và làm bài tập chuyên đề.`,
+        btnText: 'Học Ngữ Pháp',
+        accentColor: 'var(--color-interactive)',
+        iconColor: '#8b5cf6' 
+    });
+
     const completedCount = Object.keys(AppState.completedExams || {}).length;
-    const hoursStudied = Math.round((completedCount * 45 + AppState.streak * 15) / 60 * 10) / 10;
+    let totalMinutes = 0;
+    if (AppState.activityLog) {
+        AppState.activityLog.forEach(log => {
+            if (log.durationMinutes) totalMinutes += log.durationMinutes;
+        });
+    }
+    const hoursStudied = totalMinutes > 0 ? (Math.round((totalMinutes / 60) * 10) / 10) : (Math.round((completedCount * 45 + AppState.streak * 15) / 60 * 10) / 10);
+
+    // Calculate last 7 days streak
+    const today = new Date();
+    const streakDays = [];
+    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    
+    const activityMap = {};
+    let maxStreak = 0;
+    if (AppState.activityLog && AppState.activityLog.length > 0) {
+        const dateSet = new Set();
+        AppState.activityLog.forEach(log => {
+            if (log.timestamp) {
+                const d = new Date(log.timestamp);
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                activityMap[dateStr] = true;
+                
+                d.setHours(0,0,0,0);
+                dateSet.add(d.getTime());
+            }
+        });
+        
+        const sortedDates = Array.from(dateSet).sort((a,b) => a - b);
+        let currentStreak = 1;
+        maxStreak = 1;
+        
+        for (let i = 1; i < sortedDates.length; i++) {
+            const diff = sortedDates[i] - sortedDates[i-1];
+            if (diff <= 86400000 + 3600000 && diff >= 86400000 - 3600000) {
+                currentStreak++;
+                if (currentStreak > maxStreak) maxStreak = currentStreak;
+            } else {
+                currentStreak = 1;
+            }
+        }
+    }
+    if (maxStreak === 0 && AppState.streak > 0) maxStreak = AppState.streak;
+
+    // Include this week Monday -> Sunday
+    const currentDayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); // 1 = Monday, 7 = Sunday
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - currentDayOfWeek + 1);
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const isToday = d.toDateString() === today.toDateString();
+        const isActive = activityMap[dateStr] || false; 
+        
+        streakDays.push({
+            label: dayNames[d.getDay()],
+            isActive: isActive,
+            isToday: isToday
+        });
+    }
+
+    const streakHtml = streakDays.map(day => `
+        <div class="streak-day-dot ${day.isActive ? 'active' : ''}">
+            <span class="streak-circle">${day.isActive ? '✓' : ''}</span>
+            <span class="day-initial" style="${day.isToday ? 'font-weight:900; color:var(--text-primary);' : ''}">${day.label}</span>
+        </div>
+    `).join('');
+
+    const tasksHtml = topTasks.map((task, index) => `
+        <div class="top-task-card" style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; transition: all 0.2s ease;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 18px;">${task.icon}</span>
+                    <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${task.iconColor};">${task.tag}</span>
+                </div>
+                <h3 style="font-family: var(--font-heading); font-size: 16px; margin-bottom: 6px; font-weight: 800; color: var(--text-primary);">${task.title}</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">${task.desc}</p>
+            </div>
+            <button class="btn btn-secondary task-cta-btn" data-id="${task.id}" data-type="${task.type}" data-exam="${task.examId || ''}" style="width: 100%; justify-content: center; font-size: 13px; padding: 10px; ${index === 0 ? `background: ${task.accentColor}; color: #fff; border-color: ${task.accentColor}; box-shadow: 0 4px 12px rgba(230, 92, 0, 0.2);` : ''}">
+                ${task.btnText} <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 4px;"></i>
+            </button>
+        </div>
+    `).join('');
 
     container.innerHTML = `
-        <div class="dashboard-grid animate-zoom">
-            <div class="dashboard-left">
-                <!-- S-4: Hero Task Widget — Redesigned as Control Panel -->
-                <div class="glass-card primary-accent" style="padding: 28px; display: flex; flex-direction: column; gap: 20px;">
-                    <div>
-                        <span style="display:inline-block; font-size:var(--text-xs); font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:8px;">
-                            ${heroTask.icon} <span style="color:${heroTask.accentColor};">${heroTask.tag}</span>
-                        </span>
-                        <h2 style="font-family: var(--font-heading); font-size: var(--text-xl); font-weight: 900; margin-bottom: 8px; color: var(--text-primary); line-height: 1.2;">${heroTask.title}</h2>
-                        <p style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">${heroTask.desc}</p>
-                    </div>
-
-                    <!-- Targeted Skills Panel -->
-                    <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 16px;">
-                        <span style="font-size: var(--text-xs); font-weight: 700; color: var(--text-tertiary); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">🎯 Kỹ năng trọng tâm</span>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                            ${heroTask.skills.map(skill => `<span class="modal-badge warning" style="background: rgba(230, 92, 0, 0.06); color: var(--color-commitment); border: 1px solid rgba(230, 92, 0, 0.15); margin: 0; font-size: 11px;">${skill}</span>`).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Rewards Panel -->
-                    <div style="display: flex; gap: 12px;">
-                        <div style="flex: 1; background: rgba(0, 176, 255, 0.04); border: 1px solid rgba(0, 176, 255, 0.15); border-radius: var(--radius-md); padding: 10px; display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 18px;">💎</span>
-                            <div>
-                                <span style="font-size: 10px; color: var(--text-tertiary); display: block; line-height: 1; text-transform: uppercase; font-weight: 600;">XP Thưởng</span>
-                                <strong style="font-size: 13px; color: var(--color-interactive); font-family: var(--font-heading);">${heroTask.xpReward}</strong>
-                            </div>
-                        </div>
-                        <div style="flex: 1; background: rgba(230, 92, 0, 0.04); border: 1px solid rgba(230, 92, 0, 0.15); border-radius: var(--radius-md); padding: 10px; display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 18px;">🔥</span>
-                            <div>
-                                <span style="font-size: 10px; color: var(--text-tertiary); display: block; line-height: 1; text-transform: uppercase; font-weight: 600;">Streak Bonus</span>
-                                <strong style="font-size: 13px; color: var(--color-commitment); font-family: var(--font-heading);">${heroTask.streakReward}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Checklist -->
-                    <div style="border-top: 1px solid var(--border-color); padding-top: 16px;">
-                        <span style="font-size: var(--text-xs); font-weight: 700; color: var(--text-tertiary); display: block; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">📋 Nhiệm vụ hôm nay</span>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            ${heroTask.checklist.map((item, idx) => `
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <input type="checkbox" id="hero-chk-${idx}" ${item.done ? 'checked' : ''} style="accent-color: var(--color-commitment); cursor: pointer;" />
-                                    <label for="hero-chk-${idx}" style="font-size: var(--text-sm); color: ${item.done ? 'var(--text-tertiary)' : 'var(--text-secondary)'}; text-decoration: ${item.done ? 'line-through' : 'none'}; cursor: pointer;">${item.text}</label>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 8px;">
-                        <button class="btn btn-primary" id="hero-task-btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; ${heroTask.btnStyle}">
-                            ${heroTask.btnText} <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
-                        </button>
-                    </div>
+        <div class="dashboard-grid-balanced animate-zoom" style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- S-4: Top Tasks Control Panel -->
+            <div class="glass-card primary-accent" style="padding: 28px;">
+                <div style="margin-bottom: 20px;">
+                    <h2 style="font-family: var(--font-heading); font-size: var(--text-xl); font-weight: 900; color: var(--text-primary);">🎯 Top 3 Nhiệm Vụ Hôm Nay</h2>
+                    <p style="font-size: var(--text-sm); color: var(--text-secondary);">Các hoạt động được gợi ý riêng cho bạn dựa trên lịch sử học tập gần nhất.</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    ${tasksHtml}
                 </div>
             </div>
 
-            <!-- Right Sidebar Widgets -->
-            <div class="dashboard-right">
+            <!-- Bottom Row: Widgets -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
                 <!-- Exam countdown clock -->
                 <div class="glass-card countdown-box" style="padding: 24px;">
                     <h4 style="font-family: var(--font-heading); font-size: var(--text-md);">Đếm Ngược Kỳ Thi</h4>
@@ -725,13 +846,7 @@ function renderDashboard(container) {
                     </div>
                     <p style="font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 4px; line-height: 1.4;">Đừng ngắt chuỗi! Học tối thiểu 5 phút/ngày để tạo thói quen vững vàng.</p>
                     <div class="streak-row" style="margin-top: 16px;">
-                        <div class="streak-day-dot active"><span class="streak-circle">✓</span><span class="day-initial">T2</span></div>
-                        <div class="streak-day-dot active"><span class="streak-circle">✓</span><span class="day-initial">T3</span></div>
-                        <div class="streak-day-dot active"><span class="streak-circle">✓</span><span class="day-initial">T4</span></div>
-                        <div class="streak-day-dot active"><span class="streak-circle">✓</span><span class="day-initial">T5</span></div>
-                        <div class="streak-day-dot active"><span class="streak-circle">🔥</span><span class="day-initial">T6</span></div>
-                        <div class="streak-day-dot"><span class="streak-circle"></span><span class="day-initial">T7</span></div>
-                        <div class="streak-day-dot"><span class="streak-circle"></span><span class="day-initial">CN</span></div>
+                        ${streakHtml}
                     </div>
                     
                     <div style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -739,50 +854,38 @@ function renderDashboard(container) {
                         <span style="font-size: var(--text-sm); font-weight: 700; color: var(--text-primary);">${hoursStudied} giờ</span>
                     </div>
                     <p style="font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 8px; line-height: 1.4; font-style: italic;">
-                        🎯 Kỷ lục của bạn: ${Math.max(AppState.streak, 5)} ngày liên tục! Duy trì phong độ nhé.
+                        🎯 Kỷ lục của bạn: ${maxStreak} ngày liên tục! Duy trì phong độ nhé.
                     </p>
                 </div>
             </div>
         </div>
-
-        <!-- S-6: Detailed Skill Map (Fully integrated into Dashboard) -->
-        <div style="margin-top: 36px;" class="animate-zoom" id="dashboard-skillmap-section">
-            <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                <div>
-                    <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="map" style="color: var(--color-interactive); width: 22px; height: 22px;"></i>
-                        Bản Đồ Năng Lực Chi Tiết
-                    </h3>
-                    <p style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px;">Phân tích chi tiết và hành động rèn luyện đề xuất</p>
-                </div>
-            </div>
-            <div id="dashboard-skillmap-content"></div>
-        </div>
     `;
 
-    // Hero task CTA handler
-    document.getElementById('hero-task-btn').addEventListener('click', () => {
-        if (heroTask.type === 'adaptive') {
-            navigateTab('practice');
-            setTimeout(() => {
-                const adaptiveTabBtn = document.getElementById('tab-adaptive');
-                if (adaptiveTabBtn) adaptiveTabBtn.click();
-            }, 50);
-        } else if (heroTask.type === 'exam') {
-            startExamPortal(heroTask.examId);
-        } else {
-            navigateTab('practice');
-        }
+    // Tasks CTA handlers
+    document.querySelectorAll('.task-cta-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const type = e.currentTarget.getAttribute('data-type');
+            if (type === 'adaptive') {
+                navigateTab('practice');
+                setTimeout(() => {
+                    const adaptiveTabBtn = document.getElementById('tab-adaptive');
+                    if (adaptiveTabBtn) adaptiveTabBtn.click();
+                }, 50);
+            } else if (type === 'exam') {
+                const examId = e.currentTarget.getAttribute('data-exam');
+                startExamPortal(parseInt(examId));
+            } else if (type === 'flashcards') {
+                navigateTab('flashcards');
+            } else if (type === 'grammar') {
+                navigateTab('grammar');
+            } else {
+                navigateTab('practice');
+            }
+        });
     });
 
     // Start Live Countdown Clock
     startCountdownClock();
-
-    // Render full interactive skill map directly on dashboard
-    const skillmapContainer = document.getElementById('dashboard-skillmap-content');
-    if (skillmapContainer) {
-        renderSkillMap(skillmapContainer);
-    }
 }
 
 
@@ -923,9 +1026,9 @@ function startCountdownClock() {
             sEl.innerText = secs < 10 ? '0' + secs : secs;
 
             // Update preparation progress bar
-            const totalPrepDays = 60;
-            const elapsedDays = Math.max(0, totalPrepDays - days);
-            const elapsedPercent = Math.min(100, Math.round((elapsedDays / totalPrepDays) * 100));
+            const totalExams = typeof EXAM_RUNNERS_DB !== 'undefined' && EXAM_RUNNERS_DB.exams ? EXAM_RUNNERS_DB.exams.length : 50;
+            const completedExams = Object.keys(AppState.completedExams || {}).length;
+            const elapsedPercent = totalExams > 0 ? Math.min(100, Math.round((completedExams / totalExams) * 100)) : 0;
             const progBar = document.getElementById('countdown-progress-bar');
             const progText = document.getElementById('countdown-progress-text');
             if (progBar && progText) {
@@ -945,18 +1048,27 @@ function startCountdownClock() {
 
 // --- B. INTERACTIVE SKILL MAP PAGE (NEW DASHBOARD) ---
 function renderSkillMap(container) {
+    // Attempt to pull real average from exams if available
+    let avgExamScore = 0;
+    const examIds = Object.keys(AppState.completedExams || {});
+    if (examIds.length > 0) {
+        const total = examIds.reduce((sum, id) => sum + AppState.completedExams[id], 0);
+        avgExamScore = Math.round(total / examIds.length);
+    }
+    const baseScore = avgExamScore > 0 ? avgExamScore : 50; // default if no exams
+
     const skills = [
-        { key: "phonetics", title: "Phát Âm", cat: "knowledge", accuracy: 95, qCount: 140 },
-        { key: "stress", title: "Trọng Âm", cat: "knowledge", accuracy: 88, qCount: 95 },
-        { key: "grammar", title: "Ngữ Pháp", cat: "knowledge", accuracy: AppState.grammarAccuracy || 74, qCount: 95 },
-        { key: "synonyms", title: "Từ Vựng", cat: "knowledge", accuracy: 78, qCount: 75 },
+        { key: "phonetics", title: "Phát Âm", cat: "knowledge", accuracy: Math.min(100, baseScore + 15), qCount: 140 },
+        { key: "stress", title: "Trọng Âm", cat: "knowledge", accuracy: Math.min(100, baseScore + 8), qCount: 95 },
+        { key: "grammar", title: "Ngữ Pháp", cat: "knowledge", accuracy: AppState.grammarAccuracy || baseScore, qCount: 95 },
+        { key: "synonyms", title: "Từ Vựng", cat: "knowledge", accuracy: Math.max(0, baseScore - 5), qCount: 75 },
         
-        { key: "reading", title: "Đọc Hiểu", cat: "skill", accuracy: 68, qCount: 40 },
-        { key: "cloze", title: "Đọc Điền Từ", cat: "skill", accuracy: 62, qCount: 50 },
-        { key: "error", title: "Sửa Lỗi Sai", cat: "skill", accuracy: 72, qCount: 80 },
+        { key: "reading", title: "Đọc Hiểu", cat: "skill", accuracy: Math.max(0, baseScore - 12), qCount: 40 },
+        { key: "cloze", title: "Đọc Điền Từ", cat: "skill", accuracy: Math.max(0, baseScore - 15), qCount: 50 },
+        { key: "error", title: "Sửa Lỗi Sai", cat: "skill", accuracy: Math.max(0, baseScore - 8), qCount: 80 },
         
-        { key: "communication", title: "Giao Tiếp", cat: "attitude", accuracy: 85, qCount: 60 },
-        { key: "mock", title: "Luyện Đề", cat: "attitude", accuracy: Object.keys(AppState.completedExams).length > 0 ? Math.min(100, Object.keys(AppState.completedExams).length * 10) : 0, qCount: Object.keys(AppState.completedExams).length }
+        { key: "communication", title: "Giao Tiếp", cat: "attitude", accuracy: Math.min(100, baseScore + 10), qCount: 60 },
+        { key: "mock", title: "Luyện Đề", cat: "attitude", accuracy: examIds.length > 0 ? Math.min(100, examIds.length * 10) : 0, qCount: examIds.length }
     ];
 
     let k_score = 0, s_score = 0, a_score = 0;
@@ -1352,14 +1464,14 @@ function renderPracticeRoom(container) {
     container.innerHTML = `
         <div class="practice-room-wrapper">
             <!-- TABS UI -->
-            <div class="practice-tabs-container">
-                <button class="practice-tab-btn active" id="tab-mock" data-target="mock-content">
+            <div class="segmented-tabs-container">
+                <button class="segmented-tab-btn active" id="tab-mock" data-target="mock-content">
                     <i data-lucide="pencil-line"></i> Mock Tests (Đề thi chuẩn)
                 </button>
-                <button class="practice-tab-btn" id="tab-adaptive" data-target="adaptive-content">
+                <button class="segmented-tab-btn" id="tab-adaptive" data-target="adaptive-content">
                     <i data-lucide="brain"></i> Adaptive Retry (Khắc phục lỗi)
                 </button>
-                <button class="practice-tab-btn" id="tab-drills" data-target="drills-content">
+                <button class="segmented-tab-btn" id="tab-drills" data-target="drills-content">
                     <i data-lucide="zap"></i> ⚡ Skill Drills (Rèn chiến thuật)
                 </button>
             </div>
@@ -1405,7 +1517,7 @@ function renderPracticeRoom(container) {
     `;
 
     // Tab Switching Logic
-    const tabBtns = container.querySelectorAll('.practice-tab-btn');
+    const tabBtns = container.querySelectorAll('.segmented-tab-btn');
     const tabContents = container.querySelectorAll('.practice-tab-content');
 
     tabBtns.forEach(btn => {
@@ -2536,6 +2648,7 @@ function renderActiveExamLayout() {
             if (group.skill === 'Phonetics') instructionText = `Mark the letter A, B, C, or D to indicate the word whose underlined part differs from the other three in pronunciation in each of the following questions.`;
             else if (group.skill === 'Stress') instructionText = `Mark the letter A, B, C, or D to indicate the word that differs from the other three in the position of primary stress in each of the following questions.`;
             else if (group.skill === 'Error Correction') instructionText = `Mark the letter A, B, C, or D to indicate the underlined part that needs correction in each of the following questions.`;
+            else if (group.skill === 'Writing') instructionText = `Finish each of the following sentences in such a way that it means the same as the sentence printed before it.`;
             else if (group.skill === 'Synonyms & Antonyms') {
                 if (group.subskill === 'Opposite Meaning') instructionText = `Mark the letter A, B, C, or D to indicate the word(s) OPPOSITE in meaning to the underlined word(s) in each of the following questions.`;
                 else instructionText = `Mark the letter A, B, C, or D to indicate the word(s) CLOSEST in meaning to the underlined word(s) in each of the following questions.`;
@@ -3392,6 +3505,7 @@ window.renderExamResults = function(score, percent) {
             if (group.skill === 'Phonetics') instructionText = `Mark the letter A, B, C, or D to indicate the word whose underlined part differs from the other three in pronunciation in each of the following questions.`;
             else if (group.skill === 'Stress') instructionText = `Mark the letter A, B, C, or D to indicate the word that differs from the other three in the position of primary stress in each of the following questions.`;
             else if (group.skill === 'Error Correction') instructionText = `Mark the letter A, B, C, or D to indicate the underlined part that needs correction in each of the following questions.`;
+            else if (group.skill === 'Writing') instructionText = `Finish each of the following sentences in such a way that it means the same as the sentence printed before it.`;
             else if (group.skill === 'Synonyms & Antonyms') {
                 if (group.subskill === 'Opposite Meaning') instructionText = `Mark the letter A, B, C, or D to indicate the word(s) OPPOSITE in meaning to the underlined word(s) in each of the following questions.`;
                 else instructionText = `Mark the letter A, B, C, or D to indicate the word(s) CLOSEST in meaning to the underlined word(s) in each of the following questions.`;
@@ -3866,20 +3980,15 @@ function renderFlashcards(container) {
     // Render 3-Tab Portal Layout
     container.innerHTML = `
         <div class="flashcard-upgrades-container animate-zoom">
-            <div style="text-align: center; margin-bottom: 32px;">
-                <h2 style="font-family: var(--font-heading); font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Bàn học từ vựng Flashcard</h2>
-                <p style="color: var(--text-secondary); margin-top: 6px; font-size: 13px;">Học từ vựng thông minh theo chủ đề, phát âm giọng chuẩn và mini-games tương tác tự động.</p>
-            </div>
-            
             <!-- Tab Navigation Bar -->
-            <div class="flashcard-tabs-row">
-                <button class="flashcard-tab-btn ${AppState.activeFlashcardTab === 'topics' ? 'active' : ''}" onclick="switchFlashcardTab('topics')">
+            <div class="segmented-tabs-container">
+                <button class="segmented-tab-btn ${AppState.activeFlashcardTab === 'topics' ? 'active' : ''}" onclick="switchFlashcardTab('topics')">
                     📚 Các Chủ Đề
                 </button>
-                <button class="flashcard-tab-btn ${AppState.activeFlashcardTab === 'vocab' ? 'active' : ''}" onclick="switchFlashcardTab('vocab')">
+                <button class="segmented-tab-btn ${AppState.activeFlashcardTab === 'vocab' ? 'active' : ''}" onclick="switchFlashcardTab('vocab')">
                     🗂️ Tất Cả Từ Vựng
                 </button>
-                <button class="flashcard-tab-btn ${AppState.activeFlashcardTab === 'import' ? 'active' : ''}" onclick="switchFlashcardTab('import')">
+                <button class="segmented-tab-btn ${AppState.activeFlashcardTab === 'import' ? 'active' : ''}" onclick="switchFlashcardTab('import')">
                     📥 Nhập Hàng Loạt
                 </button>
             </div>
@@ -3898,7 +4007,7 @@ window.switchFlashcardTab = function(tabName) {
     AppState.activeFlashcardTab = tabName;
     
     // Update active class on tab buttons
-    const btns = document.querySelectorAll('.flashcard-tab-btn');
+    const btns = document.querySelectorAll('.segmented-tab-btn');
     btns.forEach(btn => {
         if (btn.innerText.includes(tabName === 'topics' ? 'Chủ Đề' : tabName === 'vocab' ? 'Từ Vựng' : 'Hàng Loạt')) {
             btn.classList.add('active');
@@ -3918,6 +4027,18 @@ window.escapeHtml = function(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+};
+
+window.formatMarkdownAndHtml = function(str) {
+    if (!str) return '';
+    let escaped = window.escapeHtml(str);
+    escaped = escaped.replace(/&lt;br\s*\/?&gt;/gi, '<br>');
+    escaped = escaped.replace(/&lt;small\s+style=(&#039;|&quot;)(.*?)\1&gt;/gi, '<small style="$2">');
+    escaped = escaped.replace(/&lt;\/small&gt;/gi, '</small>');
+    
+    let formatted = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    return formatted;
 };
 
 window.speakWord = function(text) {
@@ -4435,14 +4556,15 @@ function renderFlashcardTabContent() {
             <!-- Topics Grid -->
             <div class="topics-grid">
                 <!-- All Vocabulary seeded card -->
-                <div class="topic-card" onclick="viewTopicDetail('all')" style="border-color: rgba(0, 176, 255, 0.35); background: rgba(0, 176, 255, 0.015);">
+                <div class="topic-card topic-card--featured" onclick="viewTopicDetail('all')">
                     <div class="topic-card-body">
-                        <h3 style="color: var(--color-interactive); font-size: 17px;">🌟 Tất Cả Từ Vựng</h3>
-                        <p style="color: var(--text-secondary);">Học toàn bộ kho từ vựng đã tích lũy trong tài khoản của bạn. Bứt phá phản xạ trước thềm kỳ thi 10.</p>
+                        <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-commitment); display: block; margin-bottom: 6px;">⭐ NỔI BẬT</span>
+                        <h3>Tất Cả Từ Vựng</h3>
+                        <p>Học toàn bộ kho từ vựng đã tích lũy trong tài khoản của bạn. Bứt phá phản xạ trước thềm kỳ thi 10.</p>
                     </div>
                     <div class="topic-card-footer">
-                        <span class="topic-count">${AppState.flashcards.length} từ vựng</span>
-                        <button class="btn btn-primary topic-study-btn" style="background: var(--color-interactive); color: #000; font-weight:700;">Học toàn bộ →</button>
+                        <span class="topic-count">${AppState.flashcards.length} Từ Vựng</span>
+                        <button class="btn btn-primary topic-study-btn" onclick="event.stopPropagation(); viewTopicDetail('all')">Học toàn bộ →</button>
                     </div>
                 </div>
         `;
@@ -4561,7 +4683,7 @@ function renderFlashcardTabContent() {
                         </td>
                         <td style="padding: 12px 16px;">
                             <div style="color: var(--color-interactive); font-weight: 600;">${escapeHtml(w.translation)}</div>
-                            ${w.example ? `<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; font-style: italic;">"${escapeHtml(w.example)}"</div>` : ''}
+                            ${w.example ? `<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; font-style: italic;">"${window.formatMarkdownAndHtml(w.example)}"</div>` : ''}
                         </td>
                         <td style="padding: 12px 16px; text-align: right; white-space: nowrap;">
                             <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; margin-right: 6px;" onclick="startEditWord(${w.id})">Sửa</button>
@@ -4849,7 +4971,7 @@ function renderTopicDetailView(container) {
                                     <h4>${escapeHtml(w.word)} <span class="modal-badge warning" style="font-size: 9px; padding: 2px 6px; font-weight: normal; margin-left: 8px;">${w.type || 'Noun'}</span></h4>
                                     <div class="word-meta">${escapeHtml(w.ipa || '')}</div>
                                     <div class="word-translation">${escapeHtml(w.translation)}</div>
-                                    ${w.example ? `<div class="word-example">"${escapeHtml(w.example)}"</div>` : ''}
+                                    ${w.example ? `<div class="word-example">"${window.formatMarkdownAndHtml(w.example)}"</div>` : ''}
                                 </div>
                             </div>
                             <div class="word-card-actions">
@@ -4933,6 +5055,7 @@ function renderStandardFlashcards(container) {
                     <div class="flashcard-flipper">
                         <div class="card-face front">
                             <span class="modal-badge warning" style="position:absolute; top:16px; left:16px;" id="fc-tag-txt">Noun</span>
+                            <span id="fc-status-badge" style="position:absolute; top:16px; right:16px;"></span>
                             <h2 class="card-front-word" id="fc-word-txt">Investigate</h2>
                             <span class="card-ipa" id="fc-ipa-txt">/ɪnˈves.tɪ.ɡeɪt/</span>
                             <span class="card-tip-label">Nhấp chuột để lật thẻ</span>
@@ -4975,9 +5098,11 @@ function renderSpellingBee(container) {
     }
 
     const item = AppState.flashcardQueue[AppState.currentFlashcardIndex];
-    // Mask word in the example sentence
+    // Extract only English sentence part of the example, and mask the target word
+    const englishExample = (item.example || '').split(/<br>|<small/i)[0];
     const regex = new RegExp(item.word, 'gi');
-    const maskedSentence = item.example.replace(regex, "___");
+    const maskedSentence = englishExample.replace(regex, "___");
+    const formattedSentence = window.formatMarkdownAndHtml(maskedSentence);
 
     container.innerHTML = `
         <div class="animate-zoom" style="max-width: 600px; margin: 0 auto;">
@@ -4987,10 +5112,10 @@ function renderSpellingBee(container) {
                 <span class="modal-badge warning" style="background:rgba(255,193,7,0.15); color:var(--color-discovery);">${item.type}</span>
                 <h3 style="margin-top: 16px; font-size: 18px; font-family:var(--font-heading);">Thử thách Đánh vần (Spelling Bee)</h3>
                 
-                <div style="background:rgba(0,0,0,0.2); padding: 24px; border-radius: var(--radius-md); border:1px solid var(--border-color); margin: 20px 0;">
-                    <p style="font-size: 20px; font-weight: 700; color: var(--color-interactive);">${item.translation}</p>
-                    <p style="font-size: 13px; color: var(--text-tertiary); margin-top: 4px;">IPA: ${item.ipa}</p>
-                    <p style="font-size: 14px; margin-top: 16px; font-style: italic; color: var(--text-secondary);">"${maskedSentence}"</p>
+                <div style="background: var(--bg-card, #FFFFFF); padding: 24px; border-radius: var(--radius-md); border:1px solid var(--border-color); margin: 20px 0; box-shadow: var(--shadow-sm);">
+                    <p style="font-size: 20px; font-weight: 700; color: var(--color-commitment);">${item.translation}</p>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">IPA: ${item.ipa}</p>
+                    <p style="font-size: 15px; margin-top: 16px; color: var(--text-primary); line-height: 1.6;">"${formattedSentence}"</p>
                 </div>
                 
                 <div class="form-group" style="margin-bottom:20px;">
@@ -5304,27 +5429,75 @@ window.flipFlashcard = function() {
 window.updateFlashcardContent = function() {
     const q = AppState.flashcardQueue;
     if (q.length === 0) {
+        // Build status summary
+        const statuses = AppState.wordStatuses || {};
+        const allWords = AppState.flashcards;
+        const known = allWords.filter(w => (statuses[w.id] || 'new') === 'known').length;
+        const learning = allWords.filter(w => (statuses[w.id] || 'new') === 'learning').length;
+        const notKnown = allWords.filter(w => (statuses[w.id] || 'new') === 'new').length;
+        
         document.getElementById('fc-3d-card').innerHTML = `
-            <div class="card-face front" style="text-align:center;">
-                <h3>🎉 Tuyệt vời!</h3>
-                <p style="font-size:13px; color:var(--text-secondary); margin-top:8px;">Bạn đã hoàn thành toàn bộ Flashcard hôm nay!</p>
-                <button class="btn btn-primary" style="margin-top:16px;" onclick="resetFlashcardsQueue()">Học lại từ đầu</button>
+            <div class="card-face front" style="text-align:center; padding: 32px;">
+                <h3 style="color: var(--color-commitment); font-family: var(--font-heading); font-size: 22px;">🎉 Hoàn thành!</h3>
+                <p style="font-size:13px; color:var(--text-secondary); margin: 12px 0 20px;">Kết quả phiên học hôm nay</p>
+                <div style="display:flex; gap:12px; justify-content:center; margin-bottom:20px;">
+                    <div style="background:#FFF3E0; border:1px solid rgba(255,111,0,0.2); border-radius:10px; padding:12px 16px; text-align:center;">
+                        <div style="font-size:22px; font-weight:800; color:var(--color-commitment);">${known}</div>
+                        <div style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-top:2px;">Đã thuộc</div>
+                    </div>
+                    <div style="background:#FFF8E1; border:1px solid rgba(255,193,7,0.2); border-radius:10px; padding:12px 16px; text-align:center;">
+                        <div style="font-size:22px; font-weight:800; color:#F9A825;">${learning}</div>
+                        <div style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-top:2px;">Đang học</div>
+                    </div>
+                    <div style="background:#FFEBEE; border:1px solid rgba(211,47,47,0.2); border-radius:10px; padding:12px 16px; text-align:center;">
+                        <div style="font-size:22px; font-weight:800; color:var(--color-danger);">${notKnown}</div>
+                        <div style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-top:2px;">Chưa thuộc</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="resetFlashcardsQueue()" style="margin-bottom:8px;">Ôn lại từ đầu</button>
+                <button class="btn btn-secondary" onclick="showWordStatusList()" style="font-size:12px;">Xem danh sách theo trạng thái</button>
             </div>
         `;
         return;
     }
 
     const item = q[AppState.currentFlashcardIndex];
+    const currentStatus = (AppState.wordStatuses || {})[item.id] || 'new';
+    const statusBadge = currentStatus === 'known' ? '<span style="font-size:10px; background:rgba(76,175,80,0.1); color:#388E3C; border:1px solid rgba(76,175,80,0.3); border-radius:20px; padding:2px 8px; font-weight:700;">✓ Đã thuộc</span>' 
+        : currentStatus === 'learning' ? '<span style="font-size:10px; background:rgba(255,193,7,0.1); color:#F9A825; border:1px solid rgba(255,193,7,0.3); border-radius:20px; padding:2px 8px; font-weight:700;">🔄 Đang học</span>' 
+        : '';
+    
     document.getElementById('fc-word-txt').innerText = item.word;
     document.getElementById('fc-ipa-txt').innerText = item.ipa;
     document.getElementById('fc-trans-txt').innerText = item.translation;
-    document.getElementById('fc-ex-txt').innerText = `Ví dụ: "${item.example}"`;
+    // Use innerHTML to properly render HTML in example text
+    const exEl = document.getElementById('fc-ex-txt');
+    const cleanExample = window.formatMarkdownAndHtml(item.example);
+    exEl.innerHTML = `<em>Ví dụ:</em> ${cleanExample}`;
     document.getElementById('fc-tag-txt').innerText = item.type;
+    // Show current status badge if available
+    const statusEl = document.getElementById('fc-status-badge');
+    if (statusEl) statusEl.innerHTML = statusBadge;
 };
 
 window.swipeFlashcard = function(direction) {
     const card = document.getElementById('fc-3d-card');
     if (!card) return;
+
+    // Save word status
+    if (!AppState.wordStatuses) AppState.wordStatuses = {};
+    const q = AppState.flashcardQueue;
+    const item = q[AppState.currentFlashcardIndex];
+    if (item) {
+        if (direction === 'right') {
+            AppState.wordStatuses[item.id] = 'known';
+        } else if (direction === 'stay') {
+            AppState.wordStatuses[item.id] = 'learning';
+        } else if (direction === 'left') {
+            AppState.wordStatuses[item.id] = 'new';
+        }
+        saveAppStateToLocalStorage();
+    }
 
     if (direction === 'left') {
         card.classList.add('swipe-left');
@@ -5352,6 +5525,60 @@ window.swipeFlashcard = function(direction) {
 
         updateFlashcardContent();
     }, 400);
+};
+
+// Show word list filtered by status
+window.showWordStatusList = function() {
+    const statuses = AppState.wordStatuses || {};
+    const allWords = AppState.flashcards;
+    
+    const groups = {
+        new: allWords.filter(w => (statuses[w.id] || 'new') === 'new'),
+        learning: allWords.filter(w => statuses[w.id] === 'learning'),
+        known: allWords.filter(w => statuses[w.id] === 'known'),
+    };
+    
+    const renderGroup = (words, label, color, bg, borderColor) => {
+        if (words.length === 0) return '';
+        return `
+            <div style="margin-bottom: 24px;">
+                <h4 style="font-family:var(--font-heading); font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:${color}; background:${bg}; border:1px solid ${borderColor}; display:inline-block; padding:4px 10px; border-radius:20px; margin-bottom:12px;">${label} (${words.length})</h4>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    ${words.map(w => `
+                        <div style="background:#fff; border:1px solid #F0F0F0; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                            <div>
+                                <span style="font-weight:700; font-size:15px; color:var(--text-primary);">${w.word}</span>
+                                <span style="font-size:11px; color:var(--text-tertiary); margin-left:8px;">${w.ipa || ''}</span>
+                                <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">${w.translation}</div>
+                            </div>
+                            <button class="btn btn-secondary" style="font-size:11px; padding:6px 12px; white-space:nowrap;" onclick="startReviewWord(${w.id})">Ôn lại</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    };
+    
+    const container = document.getElementById('app-viewport');
+    container.innerHTML = `
+        <div class="animate-zoom" style="max-width: 640px; margin: 0 auto;">
+            <button class="btn btn-secondary" onclick="selectFlashcardMode('standard')" style="margin-bottom:24px;"><i data-lucide="arrow-left"></i> Quay lại học thẻ</button>
+            <h2 style="font-family:var(--font-heading); font-size:20px; font-weight:800; margin-bottom:4px; color:var(--text-primary);">Danh sách từ vựng theo trạng thái</h2>
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:28px;">Click "Ôn lại" để học lại bất kỳ từ nào.</p>
+            ${renderGroup(groups.new, '❌ Chưa thuộc', '#D32F2F', '#FFEBEE', 'rgba(211,47,47,0.2)')}
+            ${renderGroup(groups.learning, '🔄 Đang học', '#F9A825', '#FFF8E1', 'rgba(255,193,7,0.2)')}
+            ${renderGroup(groups.known, '✓ Đã thuộc', '#388E3C', '#F1F8E9', 'rgba(76,175,80,0.2)')}
+        </div>
+    `;
+    lucide.createIcons();
+};
+
+window.startReviewWord = function(wordId) {
+    const word = AppState.flashcards.find(w => w.id === wordId);
+    if (!word) return;
+    AppState.flashcardQueue = [word];
+    AppState.currentFlashcardIndex = 0;
+    renderStandardFlashcards(document.getElementById('app-viewport'));
 };
 
 window.resetFlashcardsQueue = function() {
@@ -5384,10 +5611,26 @@ let grammarDrawerState = {
     availableWords: [],
     hasChecked: false,
     isCorrect: false,
-    isRoundCleared: false
+    isRoundCleared: false,
+    lastRenderedQIndex: -1,
+    lastRenderedRound: -1
 };
 
 function generatePracticeQuestions(topic, subTopicIdx) {
+    const bankKey = `${topic.id}_${subTopicIdx}`;
+    if (typeof PRACTICE_BANK !== 'undefined' && PRACTICE_BANK[bankKey]) {
+        const bank = PRACTICE_BANK[bankKey];
+        const questions = [];
+        // Round 1: exactly 5 questions (no repeat)
+        bank.round1.forEach(q => questions.push(q));
+        // Round 2: exactly 10 questions (no repeat)
+        bank.round2.forEach(q => questions.push(q));
+        // Round 3: exactly 5 questions (no repeat)
+        bank.round3.forEach(q => questions.push(q));
+        return questions;
+    }
+
+
     const subTopicData = (topic.id === 'tense') ? topic.visualConfig.timeStates[subTopicIdx] : topic.visualConfig.types[subTopicIdx];
     if (!subTopicData) return [];
 
@@ -5612,7 +5855,7 @@ function getSubTopicsHtml(node, chIdx) {
                 formulaStr = codeSnippet;
             }
         }
-        let codeHtml = formulaStr ? `<span class="sub-topic-row-code">${formulaStr}</span>` : '';
+        let codeHtml = ''; // Removed grammatical structure per user request
         
         let btnHtml = '';
         let rowClass = 'sub-topic-row';
@@ -5735,11 +5978,6 @@ function renderGrammarShelf(container) {
 
     container.innerHTML = `
         <div class="animate-zoom">
-            <div class="glass-card" style="margin-bottom:24px;">
-                <h3 style="font-family: var(--font-heading);">Phòng Thí Nghiệm Ngữ Pháp Tương Tác (Interactive Grammar Lab)</h3>
-                <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Chinh conquer 10 chuyên đề ngữ pháp trọng tâm thi vào lớp 10 qua mô hình lý thuyết trực quan và hệ thống luyện tập 3 cấp độ Sandbox đạt chuẩn DAC.</p>
-            </div>
-            
             <div class="grammar-accordion-container">
                 ${cardsHtml}
             </div>
@@ -5783,6 +6021,7 @@ window.toggleChapter = function(topicId) {
 };
 
 window.openGrammarLesson = function(topicId, subTopicIdx) {
+    document.body.classList.add('grammar-fullscreen-mode');
     const topic = EXAM_RUNNERS_DB.grammarTimeline.find(t => t.id === topicId);
     if (!topic) return;
 
@@ -5799,7 +6038,9 @@ window.openGrammarLesson = function(topicId, subTopicIdx) {
         availableWords: [],
         hasChecked: false,
         isCorrect: false,
-        isRoundCleared: false
+        isRoundCleared: false,
+        lastRenderedQIndex: -1,
+        lastRenderedRound: -1
     };
 
     const viewport = document.getElementById('app-viewport');
@@ -5809,6 +6050,7 @@ window.openGrammarLesson = function(topicId, subTopicIdx) {
 };
 
 window.closeGrammarLesson = function() {
+    document.body.classList.remove('grammar-fullscreen-mode');
     navigateTab('grammar'); // Go back to grammar shelf
 };
 
@@ -5876,39 +6118,52 @@ function renderGrammarLesson() {
     const masteryVal = AppState.grammarMastery[topic.id] !== undefined ? AppState.grammarMastery[topic.id] : (topic.mastery || 0);
 
     container.innerHTML = `
-        <div class="grammar-lesson-view">
-            <div class="lesson-header-row">
-                <div style="display:flex; align-items:center; gap:16px;">
+        <div class="grammar-lesson-view with-sidebar">
+            <!-- Left Sidebar -->
+            <div class="lesson-sidebar" id="grammar-lesson-sidebar">
+                <div class="lesson-sidebar-top">
                     <button class="lesson-back-btn" onclick="window.closeGrammarLesson()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="19" y1="12" x2="5" y2="12"></line>
                             <polyline points="12 19 5 12 12 5"></polyline>
                         </svg>
                         Trở lại
                     </button>
-                    <div class="lesson-header-title-wrapper">
-                        <span class="lesson-header-subtitle">GRAMMAR INTERACTIVE LAB</span>
-                        <h2 class="lesson-header-title">${topic.title}</h2>
-                    </div>
                 </div>
-                <div class="lesson-header-progress">
+
+                <div class="lesson-sidebar-header">
+                    <span class="lesson-header-subtitle">GRAMMAR INTERACTIVE LAB</span>
+                    <h2 class="lesson-header-title">${topic.title}</h2>
+                </div>
+
+                <div class="lesson-sidebar-progress">
                     <span class="lesson-mastery-label">Mastery: ${masteryVal}%</span>
-                    <div class="lesson-mastery-bar-bg">
+                    <div class="lesson-mastery-bar-bg" style="width: 100%;">
                         <div class="lesson-mastery-bar-fill" style="width: ${masteryVal}%"></div>
                     </div>
                 </div>
-            </div>
- 
-            <div class="lesson-subtopic-selector-bar">
-                ${selectorHtml}
+
+                <div class="lesson-sidebar-nav">
+                    <div class="lesson-sidebar-nav-label">Tiểu mục học tập</div>
+                    ${selectorHtml}
+                </div>
             </div>
 
-            <div class="lesson-body-card">
-                <div class="lesson-tabs-container">
-                    <button class="lesson-tab-btn ${grammarDrawerState.activeTab === 'theory' ? 'active' : ''}" onclick="window.switchLessonTab('theory')">Lý thuyết 📖</button>
-                    ${subTopicIdx === 'overview' ? '' : `<button class="lesson-tab-btn ${grammarDrawerState.activeTab === 'practice' ? 'active' : ''}" onclick="window.switchLessonTab('practice')">Luyện tập 🧩</button>`}
+            <!-- Main Content Area -->
+            <div class="lesson-main-area">
+                <div class="lesson-main-topbar">
+                    <button class="lesson-sidebar-toggle" onclick="document.getElementById('grammar-lesson-sidebar').classList.toggle('hidden')" title="Ẩn/Hiện Menu">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <span class="lesson-main-topbar-label">Chế độ tập trung</span>
                 </div>
-                <div id="lesson-tab-pane"></div>
+                <div class="lesson-body-card">
+                    <div id="lesson-tab-pane"></div>
+                </div>
             </div>
         </div>
     `;
@@ -5930,37 +6185,43 @@ window.renderLessonTheoryTab = function() {
         const overview = topic.overview || { frequency: '', importance: '', advice: '' };
         pane.innerHTML = `
             <div class="focused-theory-card animate-zoom">
-                <div class="focused-title-row" style="margin-bottom: 20px;">
-                    <h4 style="font-family: var(--font-heading); color: var(--color-interactive); font-size: 20px; font-weight: 800;">CHIẾN LƯỢC TỔNG QUAN</h4>
-                    <span class="focused-tag" style="background: rgba(0, 176, 255, 0.15); color: var(--color-interactive); font-weight: 800; border-radius: 4px; padding: 4px 8px; font-size: 11px;">Overview</span>
-                </div>
-                
-                <div style="font-size: 14.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
-                    Chào mừng bạn đến với chuyên đề <strong>${topic.title}</strong>! Dưới đây là phân tích chiến lược từ ban chuyên môn <em>Exam Runners</em> giúp bạn tối ưu hóa điểm số trong kỳ thi tuyển sinh vào lớp 10.
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="glass-card" style="padding: 16px; border: 1px solid rgba(255, 179, 0, 0.15); background: rgba(255, 179, 0, 0.03);">
-                        <div style="font-weight: 800; color: #ffb300; font-size: 13.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-                            📊 Tần suất xuất hiện (GD&ĐT Exam Frequency)
+                <details class="grammar-strategy-details">
+                    <summary>💡 Khám phá Chiến lược ôn thi (Click để mở)</summary>
+                    <div class="grammar-strategy-details-content">
+                        <div class="focused-title-row" style="margin-bottom: 20px;">
+                            <h4 style="font-family: var(--font-heading); color: var(--color-interactive); font-size: 20px; font-weight: 800;">CHIẾN LƯỢC TỔNG QUAN</h4>
+                            <span class="focused-tag" style="background: rgba(0, 176, 255, 0.15); color: var(--color-interactive); font-weight: 800; border-radius: 4px; padding: 4px 8px; font-size: 11px;">Overview</span>
                         </div>
-                        <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">${overview.frequency || 'Đang cập nhật...'}</div>
-                    </div>
-                    
-                    <div class="glass-card" style="padding: 16px; border: 1px solid rgba(0, 176, 255, 0.15); background: rgba(0, 176, 255, 0.03);">
-                        <div style="font-weight: 800; color: var(--color-interactive); font-size: 13.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-                            🎯 Tầm quan trọng sư phạm (Core Importance)
+                        
+                        <div style="font-size: 14.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
+                            Chào mừng bạn đến với chuyên đề <strong>${topic.title}</strong>! Dưới đây là phân tích chiến lược từ ban chuyên môn <em>Exam Runners</em> giúp bạn tối ưu hóa điểm số trong kỳ thi tuyển sinh vào lớp 10.
                         </div>
-                        <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">${overview.importance || 'Đang cập nhật...'}</div>
-                    </div>
-                    
-                    <div class="glass-card" style="padding: 16px; border: 1px solid rgba(76, 175, 80, 0.15); background: rgba(76, 175, 80, 0.03);">
-                        <div style="font-weight: 800; color: var(--color-validation-light); font-size: 13.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-                            💡 Gợi ý tiếp cận & Lộ trình (Strategic Advice)
+                        
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div class="glass-card" style="padding: 16px; border: 1px solid rgba(255, 179, 0, 0.15); background: rgba(255, 179, 0, 0.03);">
+                                <div style="font-weight: 800; color: #ffb300; font-size: 13.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    📊 Tần suất xuất hiện (GD&ĐT Exam Frequency)
+                                </div>
+                                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">${overview.frequency || 'Đang cập nhật...'}</div>
+                            </div>
+                            
+                            <div class="glass-card" style="padding: 16px; border: 1px solid rgba(0, 176, 255, 0.15); background: rgba(0, 176, 255, 0.03);">
+                                <div style="font-weight: 800; color: var(--color-interactive); font-size: 13.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    🎯 Tầm quan trọng sư phạm (Core Importance)
+                                </div>
+                                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">${overview.importance || 'Đang cập nhật...'}</div>
+                            </div>
+                            
+                            <div class="glass-card" style="padding: 16px; border: 1px solid rgba(76, 175, 80, 0.15); background: rgba(76, 175, 80, 0.03);">
+                                <div style="font-weight: 800; color: var(--color-validation-light); font-size: 13.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    💡 Gợi ý tiếp cận & Lộ trình (Strategic Advice)
+                                </div>
+                                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">${overview.advice || 'Đang cập nhật...'}</div>
+                            </div>
                         </div>
-                        <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">${overview.advice || 'Đang cập nhật...'}</div>
                     </div>
-                </div>
+                </details>
+                <!-- Overview has no practice questions, but we can add a button to go to next subtopic if needed. For now just hide practice CTA for overview -->
             </div>
         `;
         return;
@@ -6133,6 +6394,7 @@ window.renderLessonTheoryTab = function() {
             ${examplesHtml}
             ${counterExamplesHtml}
             ${commonMistakesHtml}
+            <button class="btn-mega-practice" onclick="window.switchLessonTab('practice')">🎯 Đã hiểu lý thuyết, Bắt đầu luyện tập ngay!</button>
         </div>
     `;
 };
@@ -6159,6 +6421,11 @@ window.renderLessonPracticeTab = function() {
     const questions = grammarDrawerState.practiceQuestions;
     const qIndex = grammarDrawerState.overallQuestionIndex;
     const currentRound = grammarDrawerState.currentRound || 1;
+
+    const isNewQuestionOrRound = (grammarDrawerState.lastRenderedQIndex !== qIndex || grammarDrawerState.lastRenderedRound !== currentRound);
+    grammarDrawerState.lastRenderedQIndex = qIndex;
+    grammarDrawerState.lastRenderedRound = currentRound;
+    const zoomClass = isNewQuestionOrRound ? 'animate-zoom' : '';
 
     // Check if we finished the entire subtopic (Round 3 completed)
     if (qIndex >= questions.length) {
@@ -6191,6 +6458,7 @@ window.renderLessonPracticeTab = function() {
         roundEndIdx = 29;
         roundTotalQs = 15;
     }
+
 
     // Check if we are showing the Round congrats screen (round cleared)
     if (grammarDrawerState.isRoundCleared) {
@@ -6263,7 +6531,16 @@ window.renderLessonPracticeTab = function() {
 
     // Build question body content
     let cardContentHtml = '';
-    if (question.type === 'multiple_choice' || question.type === 'cloze') {
+    if (question.type === 'multiple_choice' || question.type === 'cloze' ||
+        question.type === 'error_identification' || question.type === 'sentence_transformation' ||
+        question.type === 'communication') {
+        const typeLabels = {
+            'multiple_choice': '',
+            'cloze': '',
+            'error_identification': '<div style="font-size:10px; font-weight:800; color:#ffb300; text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">⚠️ Error Identification — Sửa lỗi sai</div>',
+            'sentence_transformation': '<div style="font-size:10px; font-weight:800; color:var(--color-interactive); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">🔄 Sentence Transformation — Viết lại câu</div>',
+            'communication': '<div style="font-size:10px; font-weight:800; color:#a855f7; text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">💬 Communication — Tình huống giao tiếp</div>'
+        };
         let optionsHtml = '';
         Object.entries(question.options).forEach(([key, val]) => {
             let stateClass = '';
@@ -6285,9 +6562,11 @@ window.renderLessonPracticeTab = function() {
                 </div>`;
         });
         cardContentHtml = `
+            ${typeLabels[question.type] || ''}
             <div class="sandbox-stem">${question.stem}</div>
             <div class="sandbox-options">${optionsHtml}</div>`;
     } else if (question.type === 'word_builder') {
+
         let selectedZoneHtml = '';
         if (grammarDrawerState.selectedWords.length === 0) {
             selectedZoneHtml = `<span style="color:var(--text-tertiary); font-size:11px; margin:auto;">Nhấp vào các từ bên dưới để ghép câu hoàn chỉnh...</span>`;
@@ -6378,7 +6657,14 @@ window.renderLessonPracticeTab = function() {
     }
 
     pane.innerHTML = `
-        <div class="practice-sandbox animate-zoom">
+        <div class="practice-sandbox ${zoomClass}">
+            <button class="btn btn-secondary" style="margin-bottom: 20px; font-size: 13px; padding: 8px 16px;" onclick="window.switchLessonTab('theory')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; display: inline-block; vertical-align: middle;">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Quay lại Lý thuyết
+            </button>
             ${trackerHtml}
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -6455,7 +6741,9 @@ window.checkSandboxAnswer = function() {
     const question = grammarDrawerState.practiceQuestions[grammarDrawerState.overallQuestionIndex];
     
     let isCorrect = false;
-    if (question.type === 'multiple_choice' || question.type === 'cloze') {
+    if (question.type === 'multiple_choice' || question.type === 'cloze' ||
+        question.type === 'error_identification' || question.type === 'sentence_transformation' ||
+        question.type === 'communication') {
         if (!grammarDrawerState.selectedOption) {
             alert('Vui lòng chọn một đáp án!');
             return;
@@ -6613,51 +6901,53 @@ function renderParentHub(container) {
     const activeWeaknesses = AppState.weaknesses ? AppState.weaknesses.length : 0;
 
     let disciplineState = "green";
-    let stateBadgeText = "🟢 Tự Giác Rất Tốt";
+    let stateBadgeText = "🟢 Rất Chăm Chỉ";
     let statusText = "Con đang duy trì kỷ luật rất tốt, chủ động rèn luyện thường xuyên.";
-    let statusClass = "green";
     let actionPromptHtml = "";
-
-    if (daysSinceLastActivity <= 2 || currentStreak >= 3) {
-        disciplineState = "green";
-        stateBadgeText = "🟢 Tự Giác Rất Tốt";
-        statusText = "Con đang duy trì kỷ luật rất tốt, chủ động rèn luyện thường xuyên.";
-        statusClass = "green";
+    
+    // Actionable Insights logic
+    if (logs.length === 0) {
+        disciplineState = "yellow";
+        stateBadgeText = "🟡 Chưa Bắt Đầu";
+        statusText = "Con chưa thực hiện hoạt động học tập nào trên hệ thống.";
         actionPromptHtml = `
-            <div style="padding: 20px; background:rgba(76,175,80,0.06); border-radius:var(--radius-md); border:1px dashed rgba(76,175,80,0.25); text-align:center;">
-                <div style="font-size:32px; margin-bottom:10px;">🎉</div>
-                <blockquote style="font-size:14px; font-weight:700; color:#81c784; font-style:italic; line-height:1.5; margin:0 0 10px;">
-                    "Bố/mẹ thấy dạo này con rất tự giác học Tiếng Anh, mẹ rất tự hào về sự kiên trì nỗ lực này của con!"
-                </blockquote>
-                <p style="font-size:11px; color:rgba(129,199,132,0.7); margin:0;">💡 Ghi nhận nỗ lực (không phải điểm số) tạo động lực bền vững cho trẻ</p>
+            <div style="padding: 16px; background:rgba(255,152,0,0.06); border-radius:12px; border:1px dashed rgba(255,152,0,0.25);">
+                <div style="font-size:14px; font-weight:700; color:#ffb74d; margin-bottom: 8px;">💡 Lời khuyên cho Phụ huynh:</div>
+                <div style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom: 12px;">Con mới bắt đầu tham gia lộ trình học. Bố mẹ hãy khích lệ con bắt đầu làm quen bằng cách hoàn thành 15 phút bài học ngữ pháp hoặc ôn từ vựng đầu tiên nhé!</div>
+                <blockquote style="font-size:13px; font-style:italic; border-left: 3px solid #ffb74d; padding-left: 10px; margin: 0; color: #ffcc80;">"Con hãy thử khám phá kho từ vựng Flashcard hoặc thử thách ngữ pháp đầu tiên xem sao nhé!"</blockquote>
+            </div>
+        `;
+    } else if (daysSinceLastActivity <= 2 || currentStreak >= 3) {
+        disciplineState = "green";
+        stateBadgeText = "🟢 Rất Chăm Chỉ";
+        statusText = currentStreak > 0 ? `Tuyệt vời! Con đã duy trì chuỗi học ${currentStreak} ngày liên tục.` : "Con đang có nhịp độ học khá tốt. Hãy tiếp tục duy trì nhé!";
+        actionPromptHtml = `
+            <div style="padding: 16px; background:rgba(76,175,80,0.06); border-radius:12px; border:1px dashed rgba(76,175,80,0.25);">
+                <div style="font-size:14px; font-weight:700; color:#81c784; margin-bottom: 8px;">🌟 Lời khuyên cho Phụ huynh:</div>
+                <div style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom: 12px;">Con đang có đà học rất tốt. Khích lệ sự nỗ lực (thay vì chỉ khen điểm số) sẽ giúp con duy trì động lực lâu dài.</div>
+                <blockquote style="font-size:13px; font-style:italic; border-left: 3px solid #81c784; padding-left: 10px; margin: 0; color: #a5d6a7;">"Bố/mẹ thấy dạo này con rất tự giác học Tiếng Anh, mẹ rất tự hào về sự kiên trì nỗ lực này của con!"</blockquote>
             </div>
         `;
     } else if (daysSinceLastActivity <= 4 || activeWeaknesses < 10) {
         disciplineState = "yellow";
         stateBadgeText = "🟡 Cần Động Viên";
-        statusText = "Con bắt đầu có dấu hiệu chững lại, chưa nộp thêm bài mới trong 3-4 ngày qua.";
-        statusClass = "yellow";
+        statusText = `Con đang chững lại nhẹ, đã ${daysSinceLastActivity} ngày chưa nộp bài mới.`;
         actionPromptHtml = `
-            <div style="padding: 20px; background:rgba(255,152,0,0.06); border-radius:var(--radius-md); border:1px dashed rgba(255,152,0,0.25); text-align:center;">
-                <div style="font-size:32px; margin-bottom:10px;">⚠️</div>
-                <blockquote style="font-size:14px; font-weight:700; color:#ffb74d; font-style:italic; line-height:1.5; margin:0 0 10px;">
-                    "Bố/mẹ thấy dạo này lịch học của con có vẻ khá căng thẳng. Con có cần bố/mẹ hỗ trợ gì để bớt áp lực không, hay tối nay hai mẹ con đi dạo một chút nhé?"
-                </blockquote>
-                <p style="font-size:11px; color:rgba(255,183,77,0.7); margin:0;">💡 Hỏi thăm sự mệt mỏi giúp con cảm thấy được quan tâm và sớm quay lại học</p>
+            <div style="padding: 16px; background:rgba(255,152,0,0.06); border-radius:12px; border:1px dashed rgba(255,152,0,0.25);">
+                <div style="font-size:14px; font-weight:700; color:#ffb74d; margin-bottom: 8px;">⚠️ Lời khuyên cho Phụ huynh:</div>
+                <div style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom: 12px;">Con có thể đang gặp áp lực hoặc bài khó. Hãy hỏi thăm nhẹ nhàng để giúp con giải tỏa.</div>
+                <blockquote style="font-size:13px; font-style:italic; border-left: 3px solid #ffb74d; padding-left: 10px; margin: 0; color: #ffcc80;">"Dạo này lịch học của con có vẻ căng thẳng. Tối nay hai mẹ con đi dạo một chút cho khuây khỏa nhé?"</blockquote>
             </div>
         `;
     } else {
         disciplineState = "red";
-        stateBadgeText = "🔴 Cần Nhắc Nhở Nhẹ";
-        statusText = "Đã quá 5 ngày con chưa đăng nhập làm bài. Cần can thiệp nhẹ nhàng.";
-        statusClass = "red";
+        stateBadgeText = "🔴 Cần Nhắc Nhở";
+        statusText = `Cảnh báo: Con đã bỏ bê việc học quá ${daysSinceLastActivity} ngày.`;
         actionPromptHtml = `
-            <div style="padding: 20px; background:rgba(244,67,54,0.06); border-radius:var(--radius-md); border:1px dashed rgba(244,67,54,0.25); text-align:center;">
-                <div style="font-size:32px; margin-bottom:10px;">🚨</div>
-                <blockquote style="font-size:14px; font-weight:700; color:#e57373; font-style:italic; line-height:1.5; margin:0 0 10px;">
-                    "Mẹ thấy đề thi Tiếng Anh dạo này có vẻ khó hơn nhiều đúng không con? Tối nay mẹ ngồi cạnh, con chỉ cần làm 15 phút thôi nhé!"
-                </blockquote>
-                <p style="font-size:11px; color:rgba(229,115,115,0.7); margin:0;">💡 Quy tắc "Chỉ 15 phút": 90% học sinh tiếp tục học sau khi vượt qua rào cản bắt đầu</p>
+            <div style="padding: 16px; background:rgba(244,67,54,0.06); border-radius:12px; border:1px dashed rgba(244,67,54,0.25);">
+                <div style="font-size:14px; font-weight:700; color:#e57373; margin-bottom: 8px;">🚨 Lời khuyên cho Phụ huynh:</div>
+                <div style="font-size:13px; color:var(--text-secondary); line-height:1.5; margin-bottom: 12px;">Đừng trách mắng, hãy đồng hành. Thuyết phục con bắt đầu bằng "quy tắc 15 phút" sẽ dễ dàng hơn.</div>
+                <blockquote style="font-size:13px; font-style:italic; border-left: 3px solid #e57373; padding-left: 10px; margin: 0; color: #ef9a9a;">"Đề Tiếng Anh đợt này khó con nhỉ? Tối nay mẹ ngồi cạnh, con chỉ cần làm 15 phút thôi rồi nghỉ nhé!"</blockquote>
             </div>
         `;
     }
@@ -6667,7 +6957,6 @@ function renderParentHub(container) {
     let heatmapHtml = '';
     let totalStudyHours = 0;
 
-    // Calculate weekly study hours from logs
     logs.forEach(log => {
         const logDate = new Date(log.timestamp);
         const diffTime = Math.abs(today - logDate);
@@ -6676,7 +6965,6 @@ function renderParentHub(container) {
             totalStudyHours += (log.durationMinutes || 0) / 60;
         }
     });
-    if (totalStudyHours === 0) totalStudyHours = 5.6; // beautiful default fallback
 
     for (let i = 6; i >= 0; i--) {
         const targetDate = new Date();
@@ -6692,540 +6980,330 @@ function renderParentHub(container) {
         });
 
         let dotClass = 'flexible';
-        let dotContent = `<span style="font-size: 16px; opacity: 0.35;">-</span>`;
-        let tooltip = 'Ngày tự học linh hoạt / Chưa ghi nhận học tập';
+        let dotContent = `<span style="font-size: 14px; opacity: 0.35;">-</span>`;
 
         if (dayLogs.length > 0) {
             const firstLog = dayLogs[0];
             if (firstLog.status === 'late') {
                 dotClass = 'yellow';
-                dotContent = `<i data-lucide="clock" style="width:16px; height:16px; color:#ffb74d;"></i>`;
-                tooltip = `${firstLog.title} - Hoàn thành muộn (${firstLog.durationMinutes} phút)`;
+                dotContent = `<i data-lucide="clock" style="width:14px; height:14px; color:#ffb74d;"></i>`;
             } else {
                 dotClass = 'green';
-                dotContent = `<i data-lucide="check-circle" style="width:16px; height:16px; color:#81c784;"></i>`;
-                tooltip = `${firstLog.title} - Đúng hạn (${firstLog.durationMinutes} phút)`;
+                dotContent = `<i data-lucide="check-circle" style="width:14px; height:14px; color:#81c784;"></i>`;
             }
-        } else {
-            if (i > 0) {
-                if (targetDate.getDay() === 0) { // Sunday as rest day
-                    dotClass = 'rest';
-                    dotContent = `☕`;
-                    tooltip = 'Ngày nghỉ xả hơi cuối tuần (Khuyến khích nghỉ ngơi)';
-                } else {
-                    dotClass = 'flexible';
-                    dotContent = `<span style="font-size: 16px; opacity: 0.35;">-</span>`;
-                    tooltip = 'Ngày tự học linh hoạt (Chưa ghi nhận hoạt động)';
-                }
-            } else {
-                dotClass = 'flexible';
-                dotContent = `<span style="font-size: 16px; opacity: 0.35;">-</span>`;
-                tooltip = 'Hôm nay: Chưa ghi nhận hoạt động tự học';
-            }
+        } else if (i > 0 && targetDate.getDay() === 0) {
+            dotClass = 'rest';
+            dotContent = `<span style="font-size: 12px;">☕</span>`;
         }
 
         heatmapHtml += `
-            <div class="calendar-day-col">
-                <span class="day-label" style="font-size:11px; font-weight:700; color:${i === 0 ? 'var(--color-interactive)' : 'var(--text-tertiary)'};">${dayLabel}${i === 0 ? ' (Nay)' : ''}</span>
-                <div class="day-dot ${dotClass}" style="cursor:pointer;" title="${tooltip}">${dotContent}</div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                <span style="font-size:10px; font-weight:700; color:${i === 0 ? 'var(--color-interactive)' : 'var(--text-tertiary)'};">${dayLabel}</span>
+                <div class="day-dot ${dotClass}" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: ${dotClass === 'green' ? 'rgba(76,175,80,0.1)' : dotClass === 'yellow' ? 'rgba(255,152,0,0.1)' : dotClass === 'rest' ? 'rgba(143,130,117,0.1)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${dotClass === 'green' ? 'rgba(76,175,80,0.3)' : dotClass === 'yellow' ? 'rgba(255,152,0,0.3)' : dotClass === 'rest' ? 'rgba(143,130,117,0.2)' : 'var(--border-color)'};">
+                    ${dotContent}
+                </div>
             </div>
         `;
     }
 
-    // 3. Generate Timeline Activities list
-    let activityTimelineHtml = '';
-    const sortedLogs = [...logs].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 4);
+    // 3. Generate Dynamic SVG Sparkline (ROI)
+    let defsHtml = `
+        <defs>
+            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--color-interactive)" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="var(--color-interactive)" stop-opacity="0.0"/>
+            </linearGradient>
+            <linearGradient id="goalGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4caf50" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#4caf50" stop-opacity="0.0"/>
+            </linearGradient>
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+    `;
+    let svgPathHtml = defsHtml;
+    let svgDotsHtml = '';
+    let chartSummaryText = '';
     
-    if (sortedLogs.length === 0) {
-        activityTimelineHtml = `
-            <div style="text-align:center; padding:20px; color:var(--text-tertiary); font-size:12.5px;">
-                📭 Con chưa thực hiện hoạt động rèn luyện nào trong tuần này.
+    let examScores = [];
+    if (AppState.completedExams) {
+        const sortedExams = Object.keys(AppState.completedExams).sort((a,b) => a - b);
+        examScores = sortedExams.map(id => AppState.completedExams[id]);
+    }
+    
+    if (examScores.length >= 2) {
+        const totalPoints = examScores.length;
+        const widthBetween = totalPoints > 1 ? 260 / (totalPoints - 1) : 260;
+        
+        let points = examScores.map((score, index) => ({
+            x: 20 + index * widthBetween,
+            y: 105 - score * 0.8
+        }));
+        
+        let pathD = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 0; i < points.length - 1; i++) {
+            const p1 = points[i];
+            const p2 = points[i+1];
+            pathD += ` C ${(p1.x + p2.x)/2} ${p1.y}, ${(p1.x + p2.x)/2} ${p2.y}, ${p2.x} ${p2.y}`;
+        }
+        
+        let areaPathD = pathD + ` L ${points[points.length-1].x} 115 L ${points[0].x} 115 Z`;
+        
+        svgPathHtml += `
+            <path d="${areaPathD}" fill="url(#chartGradient)" />
+            <path d="${pathD}" fill="none" stroke="var(--color-interactive)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" />
+        `;
+        
+        points.forEach((p, index) => {
+            const isLast = index === totalPoints - 1;
+            svgDotsHtml += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--bg-primary)" stroke="${isLast ? '#4caf50' : 'var(--color-interactive)'}" stroke-width="2.5" />`;
+            if (isLast) {
+                svgDotsHtml += `
+                    <rect x="${p.x - 22}" y="${p.y - 28}" width="44" height="20" rx="4" fill="#4caf50" />
+                    <polygon points="${p.x},${p.y - 8} ${p.x - 5},${p.y - 12} ${p.x + 5},${p.y - 12}" fill="#4caf50" />
+                    <text x="${p.x}" y="${p.y - 14}" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="bold">${examScores[index]}%</text>
+                `;
+            }
+        });
+        
+        const scoreDiff = examScores[examScores.length - 1] - examScores[0];
+        chartSummaryText = scoreDiff > 0 ? `Điểm số đã tăng +${scoreDiff}% so với ban đầu.` : `Con đang duy trì điểm số ở mức ${examScores[examScores.length - 1]}%.`;
+    } else {
+        const goalVal = parseFloat(AppState.scoreGoal) * 10 || 80;
+        let points = [
+            { x: 20, y: 95 },
+            { x: 100, y: 70 },
+            { x: 190, y: 45 },
+            { x: 280, y: 105 - goalVal * 0.8 }
+        ];
+        
+        let pathD = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 0; i < points.length - 1; i++) {
+            const p1 = points[i];
+            const p2 = points[i+1];
+            pathD += ` C ${(p1.x + p2.x)/2} ${p1.y}, ${(p1.x + p2.x)/2} ${p2.y}, ${p2.x} ${p2.y}`;
+        }
+        let areaPathD = pathD + ` L ${points[points.length-1].x} 115 L ${points[0].x} 115 Z`;
+        
+        svgPathHtml += `
+            <path d="${areaPathD}" fill="url(#goalGradient)" />
+            <path d="${pathD}" fill="none" stroke="#4caf50" stroke-dasharray="6,6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        `;
+        
+        svgDotsHtml = `
+            <circle cx="20" cy="95" r="4" fill="var(--bg-primary)" stroke="#4caf50" stroke-width="2.5" />
+            <circle cx="280" cy="${105 - goalVal * 0.8}" r="5" fill="#4caf50" stroke="#4caf50" stroke-width="2" filter="url(#glow)" />
+            <rect x="240" y="${105 - goalVal * 0.8 - 32}" width="80" height="22" rx="4" fill="#4caf50" />
+            <polygon points="280,${105 - goalVal * 0.8 - 10} 274,${105 - goalVal * 0.8 - 15} 286,${105 - goalVal * 0.8 - 15}" fill="#4caf50" />
+            <text x="280" y="${105 - goalVal * 0.8 - 16}" fill="#ffffff" font-size="11" text-anchor="middle" font-weight="bold">${AppState.scoreGoal} Mục tiêu</text>
+        `;
+        chartSummaryText = `Đang hướng tới mục tiêu bứt phá đạt ${AppState.scoreGoal} điểm.`;
+    }
+
+    // 4. Calculate self-study stats
+    const grammarMastery = AppState.grammarMastery || {};
+    const totalGrammarTopics = Object.keys(grammarMastery).length || 10;
+    const completedGrammarTopics = Object.values(grammarMastery).filter(m => m === 100).length;
+    const grammarAccuracy = AppState.grammarAccuracy || 0;
+
+    const statuses = AppState.wordStatuses || {};
+    const allWords = AppState.flashcards || [];
+    const totalWordsCount = allWords.length;
+    const learnedWordsCount = allWords.filter(w => (statuses[w.id] || 'new') === 'known').length;
+    const learningWordsCount = allWords.filter(w => (statuses[w.id] || 'new') === 'learning').length;
+
+    const topics = AppState.topics || [];
+    const totalTopicsCount = topics.length;
+    let completedTopicsCount = 0;
+    topics.forEach(topic => {
+        if (topic.words && topic.words.length > 0) {
+            const allKnown = topic.words.every(wordId => (statuses[wordId] || 'new') === 'known');
+            if (allKnown) {
+                completedTopicsCount++;
+            }
+        }
+    });
+
+    // 5. Build output HTML
+    let examProgressBlockHtml = "";
+    if (completedCount === 0) {
+        examProgressBlockHtml = `
+            <div style="text-align: center; padding: 32px 16px; background: rgba(0,0,0,0.01); border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
+                <span style="font-size: 32px; display: block; margin-bottom: 12px;">📝</span>
+                <p style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0 0 6px 0;">Chưa bắt đầu luyện đề</p>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 0; line-height:1.5;">Con chưa thực hiện bài thi thử nào. Báo cáo tiến trình luyện đề và biểu đồ phân tích điểm số sẽ được vẽ tại đây ngay sau khi con hoàn thành bài thi thử đầu tiên.</p>
             </div>
         `;
     } else {
-        sortedLogs.forEach(log => {
-            const date = new Date(log.timestamp);
-            let timeText = date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) + ' lúc ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            
-            const diffToday = Math.abs(today - date) / (1000 * 60 * 60 * 24);
-            if (diffToday < 1 && date.getDate() === today.getDate()) {
-                timeText = 'Hôm nay lúc ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            } else if (diffToday < 2 && date.getDate() === new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1).getDate()) {
-                timeText = 'Hôm qua lúc ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            }
-            
-            let iconWrapper = '';
-            let scoreBadge = '';
-            if (log.type === 'exam') {
-                iconWrapper = `
-                    <div style="width:40px; height:40px; border-radius:50%; background:rgba(2, 132, 199, 0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <i data-lucide="file-text" style="width:18px; height:18px; color:var(--color-interactive);"></i>
+        examProgressBlockHtml = `
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <!-- Progress Bar -->
+                <div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-tertiary); font-weight:700; margin-bottom:6px; text-transform:uppercase;">
+                        <span>Tiến độ luyện đề</span>
+                        <span style="color:var(--color-interactive);">${progressPercent}%</span>
                     </div>
-                `;
-                scoreBadge = `<span style="background:rgba(2,132,199,0.12); color:var(--color-interactive); padding:4px 10px; border-radius:6px; font-weight:700; font-size:12px;">Đạt: ${log.score}%</span>`;
-            } else if (log.type === 'flashcard') {
-                iconWrapper = `
-                    <div style="width:40px; height:40px; border-radius:50%; background:rgba(21, 128, 61, 0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <i data-lucide="brain" style="width:18px; height:18px; color:#81c784;"></i>
-                    </div>
-                `;
-                scoreBadge = `<span style="background:rgba(21,128,61,0.12); color:#81c784; padding:4px 10px; border-radius:6px; font-weight:700; font-size:12px;">Từ học</span>`;
-            } else if (log.type === 'grammar') {
-                iconWrapper = `
-                    <div style="width:40px; height:40px; border-radius:50%; background:rgba(255, 152, 0, 0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <i data-lucide="award" style="width:18px; height:18px; color:#ffb74d;"></i>
-                    </div>
-                `;
-                scoreBadge = `<span style="background:rgba(255,152,0,0.12); color:#ffb74d; padding:4px 10px; border-radius:6px; font-weight:700; font-size:12px;">Đạt: ${log.score}%</span>`;
-            } else {
-                iconWrapper = `
-                    <div style="width:40px; height:40px; border-radius:50%; background:rgba(143, 130, 117, 0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <i data-lucide="clock" style="width:18px; height:18px; color:var(--text-tertiary);"></i>
-                    </div>
-                `;
-                scoreBadge = `<span style="background:rgba(143,130,117,0.12); color:var(--text-secondary); padding:4px 10px; border-radius:6px; font-weight:700; font-size:12px;">Hoạt động</span>`;
-            }
-            
-            activityTimelineHtml += `
-                <div class="activity-timeline-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:var(--radius-md); margin-bottom:8px; transition:all 0.2s ease;">
-                    <div style="display:flex; gap:14px; align-items:center;">
-                        ${iconWrapper}
-                        <div>
-                            <div style="font-size:14.5px; font-weight:700; color:var(--text-primary);">${log.title}</div>
-                            <div style="font-size:12px; color:var(--text-tertiary); margin-top:3px; display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="clock" style="width:12px; height:12px; vertical-align:middle;"></i>
-                                <span>${timeText}</span> 
-                                <span style="color:var(--border-color);">|</span> 
-                                <span>Thời gian học: ${log.durationMinutes} phút</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        ${scoreBadge}
+                    <div style="height:8px; background:rgba(0,0,0,0.06); border-radius:4px; overflow:hidden;">
+                        <div style="height:100%; width:${progressPercent}%; background:linear-gradient(90deg, #ff9800, #00b0ff, #4caf50); border-radius:4px;"></div>
                     </div>
                 </div>
-            `;
-        });
+                
+                <!-- Chart -->
+                <div style="width:100%; position:relative; background:rgba(0,0,0,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px;">
+                    <svg viewBox="0 0 325 120" style="width:100%; height:auto; overflow:visible;">
+                        <line x1="0" y1="115" x2="325" y2="115" stroke="var(--border-color)" stroke-width="1" />
+                        ${svgPathHtml}${svgDotsHtml}
+                    </svg>
+                </div>
+            </div>
+        `;
     }
 
-    // 4. Generate Dynamic SVG Sparkline (ROI)
-    const examScores = Object.values(AppState.completedExams || {});
-    let svgPathHtml = '';
-    let svgDotsHtml = '';
-    let svgLabelsHtml = '';
-    let svgValuesHtml = '';
-    let chartSummaryText = '';
-    let chartTypeLabel = '';
-
-    if (examScores.length >= 2) {
-        chartTypeLabel = "Đồ thị tiến bộ thực tế của con";
-        const totalPoints = examScores.length;
-        const widthBetween = totalPoints > 1 ? 180 / (totalPoints - 1) : 180;
-        
-        let pathD = `M 10 ${85 - (examScores[0] || 0) * 0.6}`;
-        let areaD = `M 10 90 L 10 ${85 - (examScores[0] || 0) * 0.6}`;
-        
-        examScores.forEach((score, index) => {
-            const x = 10 + index * widthBetween;
-            const y = 85 - score * 0.6; // Map score 0-100 to y 85-25
-            
-            if (index > 0) {
-                pathD += ` L ${x} ${y}`;
-            }
-            areaD += ` L ${x} ${y}`;
-            
-            const isLast = index === totalPoints - 1;
-            svgDotsHtml += `<circle cx="${x}" cy="${y}" r="${isLast ? 5 : 4}" fill="${isLast ? '#4caf50' : 'var(--color-interactive)'}" stroke="var(--bg-primary)" stroke-width="${isLast ? 2 : 1.5}" />`;
-            
-            svgLabelsHtml += `<text x="${x}" y="93" fill="var(--text-tertiary)" font-size="8" text-anchor="middle" font-weight="600">Đ.${index + 1}</text>`;
-            svgValuesHtml += `<text x="${x}" y="${y - 8}" fill="${isLast ? '#81c784' : 'var(--text-secondary)'}" font-size="${isLast ? 9 : 8}" text-anchor="middle" font-weight="bold">${score}%</text>`;
-        });
-        
-        areaD += ` L ${10 + (totalPoints - 1) * widthBetween} 90 Z`;
-        
-        svgPathHtml = `
-            <path d="${areaD}" fill="url(#chartGlow)" />
-            <path class="sparkline-path" d="${pathD}" fill="none" stroke="var(--color-interactive)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    let diagnosticsBlockHtml = "";
+    if (completedCount === 0 && logs.length === 0) {
+        diagnosticsBlockHtml = `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; text-align:center; grid-column: 1 / -1;">
+                <p style="font-size:13px; color:var(--text-secondary); margin:0; line-height:1.5;">Hệ thống đang tích lũy dữ liệu học tập của học sinh. Sau khi làm bài thi thử hoặc rèn luyện từ vựng/ngữ pháp, bản chẩn đoán chi tiết điểm mù kiến thức sẽ được phân tích tự động tại đây.</p>
+            </div>
         `;
-
-        const startScore = examScores[0];
-        const lastScore = examScores[examScores.length - 1];
-        const scoreDiff = lastScore - startScore;
-        if (scoreDiff > 0) {
-            chartSummaryText = `Điểm số tăng +${scoreDiff}% (từ ${startScore}% lên ${lastScore}%) so với điểm xuất phát.`;
-        } else if (scoreDiff < 0) {
-            chartSummaryText = `Điểm số trung bình hiện tại duy trì ở mức ${lastScore}%. Con đang tích lũy kinh nghiệm tốt.`;
-        } else {
-            chartSummaryText = `Con duy trì phong độ ổn định ở mức điểm số ${lastScore}%.`;
-        }
     } else {
-        // Smart projected curve based on target goal
-        chartTypeLabel = "Đồ thị dự phóng tiến bộ (Lộ trình tối ưu)";
-        const goalVal = parseFloat(AppState.scoreGoal) * 10 || 80;
-        
-        svgPathHtml = `
-            <path d="M 10 90 L 10 75 L 70 60 L 130 45 L 190 ${85 - goalVal * 0.6} L 190 90 Z" fill="url(#chartGlow)" />
-            <path class="sparkline-path" d="M 10 75 L 70 60 L 130 45 L 190 ${85 - goalVal * 0.6}" fill="none" stroke="var(--color-interactive)" stroke-dasharray="4,4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        diagnosticsBlockHtml = `
+            <!-- Weakness Summary -->
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px;">
+                <div style="font-size:12px; font-weight:700; color:var(--text-tertiary); text-transform:uppercase; margin-bottom:12px;">Điểm mù kiến thức (Đang gặp khó)</div>
+                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary); line-height:1.6;">
+                    <li>Ngữ pháp: <span style="color:#ffb74d;">${completedGrammarTopics > 0 ? 'Câu điều kiện (Thường sai)' : 'Chưa thu thập đủ lỗi sai'}</span></li>
+                    <li>Từ vựng: <span style="color:#ffb74d;">${learnedWordsCount > 0 ? 'Chủ đề Môi trường' : 'Chưa thu thập đủ lỗi sai'}</span></li>
+                    <li>Kỹ năng: <span style="color:#ffb74d;">${completedCount > 0 ? 'Đọc điền từ (Cloze test)' : 'Chưa thu thập đủ lỗi sai'}</span></li>
+                </ul>
+            </div>
+            
+            <!-- Action Prompt -->
+            ${actionPromptHtml}
         `;
-
-        svgDotsHtml = `
-            <circle cx="10" cy="75" r="4" fill="var(--color-interactive)" stroke="var(--bg-primary)" stroke-width="1.5" />
-            <circle cx="70" cy="60" r="4" fill="var(--color-interactive)" stroke="var(--bg-primary)" stroke-width="1.5" />
-            <circle cx="130" cy="45" r="4" fill="var(--color-interactive)" stroke="var(--bg-primary)" stroke-width="1.5" />
-            <circle cx="190" cy="${85 - goalVal * 0.6}" r="5" fill="#4caf50" stroke="var(--bg-primary)" stroke-width="2" />
-        `;
-
-        svgLabelsHtml = `
-            <text x="10" y="93" fill="var(--text-tertiary)" font-size="8" text-anchor="middle" font-weight="600">Khởi Động</text>
-            <text x="70" y="93" fill="var(--text-tertiary)" font-size="8" text-anchor="middle" font-weight="600">Tốc Lực</text>
-            <text x="130" y="93" fill="var(--text-tertiary)" font-size="8" text-anchor="middle" font-weight="600">Thử Thách</text>
-            <text x="190" y="93" fill="var(--text-tertiary)" font-size="8" text-anchor="middle" font-weight="600">Đích</text>
-        `;
-
-        svgValuesHtml = `
-            <text x="10" y="66" fill="var(--text-secondary)" font-size="8" text-anchor="middle" font-weight="bold">6.2</text>
-            <text x="70" y="51" fill="var(--text-secondary)" font-size="8" text-anchor="middle" font-weight="bold">7.0</text>
-            <text x="130" y="36" fill="var(--text-secondary)" font-size="8" text-anchor="middle" font-weight="bold">7.8</text>
-            <text x="190" y="${85 - goalVal * 0.6 - 8}" fill="#81c784" font-size="9" text-anchor="middle" font-weight="bold">${AppState.scoreGoal}</text>
-        `;
-
-        chartSummaryText = `🎯 Lộ trình tối ưu bứt phá đạt mục tiêu ${AppState.scoreGoal} điểm (Cam kết nỗ lực ${AppState.weeklyCommitment} giờ/tuần).`;
     }
 
     container.innerHTML = `
-        <div class="animate-zoom" style="color: var(--text-primary); display:flex; flex-direction:column; gap:24px;">
-            <style>
-                .parent-dashboard-grid {
-                    display: grid;
-                    grid-template-columns: 1.7fr 1fr;
-                    gap: 24px;
-                    align-items: start;
-                }
-                @media (max-width: 1024px) {
-                    .parent-dashboard-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-                
-                /* Progress bar glowing */
-                .parent-progress-glow {
-                    height: 12px;
-                    border-radius: 6px;
-                    background: rgba(255, 255, 255, 0.03);
-                    overflow: hidden;
-                    position: relative;
-                }
-                .parent-progress-fill {
-                    height: 100%;
-                    background: linear-gradient(90deg, #ff9800, #00b0ff, #4caf50);
-                    box-shadow: 0 0 12px rgba(0, 176, 255, 0.3);
-                    border-radius: 6px;
-                    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-                }
+        <div class="animate-zoom" style="color: var(--text-primary); display:flex; flex-direction:column; gap:20px; max-width: 800px; margin: 0 auto; padding-bottom:40px;">
+            <!-- Top Sync Status Panel -->
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 4px;">
+                <div style="font-size:11px; background: rgba(76, 175, 80, 0.08); border: 1px solid rgba(76, 175, 80, 0.15); padding: 6px 12px; border-radius: 20px; color:#81c784; font-weight:700; display:flex; align-items:center;">
+                    <span style="width:6px; height:6px; background:#81c784; border-radius:50%; display:inline-block; margin-right:6px;"></span>Đã đồng bộ
+                </div>
+            </div>
 
-                /* Heatmap styling */
-                .calendar-grid {
-                    display: grid;
-                    grid-template-columns: repeat(7, 1fr);
-                    gap: 12px;
-                    margin-top: 16px;
-                }
-                .calendar-day-col {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .day-label {
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: var(--text-tertiary);
-                }
-                .day-dot {
-                    width: 38px;
-                    height: 38px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.2s ease;
-                }
-                .day-dot:hover {
-                    transform: scale(1.1);
-                }
-                .day-dot.green {
-                    background: rgba(76, 175, 80, 0.12);
-                    border: 1.5px solid rgba(76, 175, 80, 0.3);
-                    box-shadow: 0 0 8px rgba(76, 175, 80, 0.08);
-                }
-                .day-dot.yellow {
-                    background: rgba(255, 152, 0, 0.12);
-                    border: 1.5px solid rgba(255, 152, 0, 0.3);
-                    box-shadow: 0 0 8px rgba(255, 152, 0, 0.08);
-                }
-                .day-dot.flexible {
-                    background: rgba(143, 130, 117, 0.04);
-                    border: 1.5px dashed rgba(143, 130, 117, 0.35);
-                    color: var(--text-tertiary);
-                }
-                .day-dot.rest {
-                    background: rgba(143, 130, 117, 0.08);
-                    border: 1.5px solid rgba(143, 130, 117, 0.15);
-                    color: var(--text-tertiary);
-                    font-size: 14px;
-                }
-                
-                .activity-timeline-row:hover {
-                    background: rgba(255,255,255,0.03) !important;
-                    border-color: var(--border-hover) !important;
-                    transform: translateX(4px);
-                }
-                
-                /* SVG Sparkline animation */
-                @keyframes drawPath {
-                    to { stroke-dashoffset: 0; }
-                }
-                .sparkline-path {
-                    stroke-dasharray: 400;
-                    stroke-dashoffset: 400;
-                    animation: drawPath 1.5s ease-out forwards;
-                }
-
-                @keyframes pulseGlow {
-                    0% { box-shadow: 0 0 8px rgba(76, 175, 80, 0.2); }
-                    50% { box-shadow: 0 0 16px rgba(76, 175, 80, 0.4); }
-                    100% { box-shadow: 0 0 8px rgba(76, 175, 80, 0.2); }
-                }
-                .pulse-glow-green {
-                    animation: pulseGlow 2s infinite ease-in-out;
-                }
-                @keyframes pulseGlowYellow {
-                    0% { box-shadow: 0 0 8px rgba(255, 152, 0, 0.2); }
-                    50% { box-shadow: 0 0 16px rgba(255, 152, 0, 0.4); }
-                    100% { box-shadow: 0 0 8px rgba(255, 152, 0, 0.2); }
-                }
-                .pulse-glow-yellow {
-                    animation: pulseGlowYellow 2s infinite ease-in-out;
-                }
-                @keyframes pulseGlowRed {
-                    0% { box-shadow: 0 0 8px rgba(244, 67, 54, 0.2); }
-                    50% { box-shadow: 0 0 16px rgba(244, 67, 54, 0.4); }
-                    100% { box-shadow: 0 0 8px rgba(244, 67, 54, 0.2); }
-                }
-                .pulse-glow-red {
-                    animation: pulseGlowRed 2s infinite ease-in-out;
-                }
-            </style>
-
-            <!-- 1. Header & Title -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-                <div>
-                    <h3 style="font-size: 22px; font-weight: 800; font-family: var(--font-heading); display:flex; align-items:center; gap:8px;">
-                        <span>🛡️ Parent Progress Hub</span>
-                    </h3>
-                    <p style="font-size:12.5px; color:var(--text-tertiary); margin-top:4px;">Theo dõi kỷ luật tự học, sự tiến bộ thực tế và nhận đề xuất hỗ trợ con trực tiếp từ chuyên gia.</p>
+            <!-- Block 1: Effort & Discipline -->
+            <div style="background: #FFFFFF; border: 1px solid #E5E5EA; border-radius: 14px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px;">
+                    <div>
+                        <h4 style="font-family:var(--font-heading); font-size:15px; font-weight:700; margin:0 0 6px 0; color:var(--text-primary);">1. Mức Độ Chăm Chỉ & Kỷ Luật</h4>
+                        <p style="font-size:13px; color:var(--text-secondary); margin:0;">${statusText}</p>
+                    </div>
+                    <span style="font-size:12px; font-weight:700; background:${disciplineState === 'green' ? 'rgba(76,175,80,0.12)' : disciplineState === 'yellow' ? 'rgba(255,152,0,0.12)' : 'rgba(244,67,54,0.12)'}; color:${disciplineState === 'green' ? '#81c784' : disciplineState === 'yellow' ? '#ffb74d' : '#e57373'}; padding:6px 12px; border-radius:20px;">
+                        ${stateBadgeText}
+                    </span>
                 </div>
                 
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <button class="btn btn-primary" onclick="window.openParentEffortCard()" style="font-size:12px; padding: 8px 16px; font-weight:700; display:flex; align-items:center; gap:6px; background:linear-gradient(90deg, #ff9800, #ffb74d); border:none; box-shadow:0 4px 15px rgba(255, 152, 0, 0.2); cursor:pointer;">
-                        <i data-lucide="sparkles" style="width:14px; height:14px;"></i>
-                        <span>📸 Khoe Nỗ Lực Gửi Gia Đình</span>
-                    </button>
-                    
-                    <div style="display: flex; align-items: center; gap: 8px; font-size:12px; background: rgba(76, 175, 80, 0.08); border: 1px solid rgba(76, 175, 80, 0.15); padding: 6px 12px; border-radius: 20px; color:#81c784; font-weight:700;">
-                        <span class="pulse-dot" style="width:6px; height:6px; background:#81c784; border-radius:50%; display:inline-block; box-shadow: 0 0 8px #81c784;"></span>
-                        <span>Đồng bộ thời gian thực</span>
+                <div style="display:flex; gap:24px; align-items:center; background: rgba(0,0,0,0.02); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                    <div style="text-align:center; padding-right: 24px; border-right: 1px dashed var(--border-color);">
+                        <div style="font-size:11px; color:var(--text-tertiary); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Thời gian học tuần</div>
+                        <div style="font-size:20px; font-weight:800; color:var(--color-interactive); font-family:var(--font-heading);">${totalStudyHours.toFixed(1)} <span style="font-size:12px;">giờ</span></div>
+                    </div>
+                    <div style="flex:1; display:flex; justify-content:space-around;">
+                        ${heatmapHtml}
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Master Dashboard Grid -->
-            <div class="parent-dashboard-grid">
+            <!-- Block 2: Progress & Performance -->
+            <div style="background: #FFFFFF; border: 1px solid #E5E5EA; border-radius: 14px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);">
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-family:var(--font-heading); font-size:15px; font-weight:700; margin:0 0 6px 0; color:var(--text-primary);">2. Tiến Độ & Hiệu Quả Học Tập</h4>
+                    <p style="font-size:13px; color:var(--text-secondary); margin:0;">Con đã hoàn thành ${completedCount}/${totalCount} đề thi (Đạt ${progressPercent}% lộ trình). ${completedCount > 0 ? chartSummaryText : ''}</p>
+                </div>
                 
-                <!-- LEFT COLUMN: Actionable Insights & Active Logs (Rộng) -->
-                <div style="display:flex; flex-direction:column; gap:20px; width:100%;">
-                    
-                    <!-- A. Chỉ số tự giác & Kỷ luật (Stats Grid & High contrast) -->
-                    <div class="glass-card pulse-glow-${disciplineState}" style="padding: 24px; display:flex; flex-direction:column; gap:16px; border: 1px solid ${disciplineState === 'green' ? 'rgba(76, 175, 80, 0.2)' : disciplineState === 'yellow' ? 'rgba(255, 152, 0, 0.2)' : 'rgba(244, 67, 54, 0.2)'}; border-top: 4px solid ${disciplineState === 'green' ? '#81c784' : disciplineState === 'yellow' ? '#ffb74d' : '#e57373'};">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:12px; font-weight:800; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:1px;">🛡️ Chỉ Số Tự Giác & Kỷ Luật</span>
-                            <span style="font-size:12px; font-weight:800; background:${disciplineState === 'green' ? 'rgba(76,175,80,0.12)' : disciplineState === 'yellow' ? 'rgba(255,152,0,0.12)' : 'rgba(244,67,54,0.12)'}; color:${disciplineState === 'green' ? '#81c784' : disciplineState === 'yellow' ? '#ffb74d' : '#e57373'}; padding:4px 12px; border-radius:20px;">
-                                ${stateBadgeText}
-                            </span>
-                        </div>
-                        
-                        <div style="font-size:16px; font-weight:700; color:var(--text-primary); font-family:var(--font-heading); line-height:1.45;">
-                            ${statusText}
-                        </div>
-                        
-                        <!-- High density metrics grid -->
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin: 8px 0;">
-                            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:12px 16px; text-align:center;">
-                                <span style="display:block; font-size:11px; color:var(--text-tertiary); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Chuỗi tự học liên tục</span>
-                                <span style="font-size:26px; font-weight:800; color:var(--color-commitment); font-family:var(--font-heading); display:inline-flex; align-items:center; gap:6px;">
-                                    🔥 ${currentStreak} <span style="font-size:13px; font-weight:600; color:var(--text-secondary);">ngày</span>
-                                </span>
+                ${examProgressBlockHtml}
+            </div>
+
+            <!-- Block 3: Self-Study Progress -->
+            <div style="background: #FFFFFF; border: 1px solid #E5E5EA; border-radius: 14px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);">
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-family:var(--font-heading); font-size:15px; font-weight:700; margin:0 0 6px 0; color:var(--text-primary);">3. Tiến Độ Tự Học (Ngữ Pháp & Từ Vựng)</h4>
+                    <p style="font-size:13px; color:var(--text-secondary); margin:0;">Thống kê chi tiết tiến trình tích lũy học liệu tại Grammar Shelf và Flashcard Desk.</p>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <!-- Grammar Shelf Stats -->
+                    <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <span style="font-size:13px; font-weight:700; color:var(--text-primary);">⚖️ Grammar Shelf</span>
+                                <span style="font-size:11px; font-weight:700; background:rgba(0,176,255,0.1); color:var(--color-interactive); padding:2px 6px; border-radius:4px;">Chuyên đề</span>
                             </div>
-                            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:12px 16px; text-align:center;">
-                                <span style="display:block; font-size:11px; color:var(--text-tertiary); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Lần rèn luyện cuối</span>
-                                <span style="font-size:20px; font-weight:800; color:${daysSinceLastActivity === 0 ? '#81c784' : daysSinceLastActivity <= 2 ? 'var(--color-interactive)' : '#e57373'}; font-family:var(--font-heading); display:inline-flex; align-items:center; gap:6px; margin-top:4px;">
-                                    ⏱️ ${daysSinceLastActivity === 0 ? 'Hôm nay' : daysSinceLastActivity === 1 ? 'Hôm qua' : daysSinceLastActivity + ' ngày trước'}
-                                </span>
-                            </div>
+                            <p style="font-size:12px; color:var(--text-secondary); margin: 0 0 12px 0;">Học tập cấu trúc ngữ pháp trọng tâm thi vào lớp 10.</p>
                         </div>
-                        
-                        <div style="font-size:12.5px; color:var(--text-secondary); line-height:1.5;">
-                            Ý thức tự học là chìa khóa vàng giúp con bứt phá điểm số bền vững. Hệ thống tự động ghi nhận nhật ký của con 24/7.
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; color:var(--text-primary); margin-bottom:6px;">
+                                <span>Chủ đề đã hoàn thành</span>
+                                <span>${completedGrammarTopics}/${totalGrammarTopics}</span>
+                            </div>
+                            <div style="height:6px; background:rgba(0,0,0,0.06); border-radius:3px; overflow:hidden; margin-bottom:12px;">
+                                <div style="height:100%; width:${(completedGrammarTopics/totalGrammarTopics)*100}%; background:var(--color-interactive); border-radius:3px;"></div>
+                            </div>
+                            <div style="font-size:11px; color:var(--text-tertiary); display:flex; justify-content:space-between;">
+                                <span>Độ chính xác trung bình</span>
+                                <span style="font-weight:700; color:var(--color-interactive);">${grammarAccuracy}%</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- B. Đề xuất Đồng Hành Từ Chuyên Gia (Action prompts) -->
-                    <div class="glass-card" style="padding: 24px;">
-                        <h4 style="margin:0 0 16px 0; font-family:var(--font-heading); font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
-                            <span>💡 Hộp Thư Đồng Hành Cùng Con</span>
-                        </h4>
-                        ${actionPromptHtml}
-                    </div>
-
-                    <!-- C. Chuyên cần (Heatmap) & Nhật ký hoạt động chi tiết -->
-                    <div class="glass-card" style="padding: 24px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom: 1px solid var(--border-color); padding-bottom:12px;">
-                            <span style="font-size:12.5px; font-weight:800; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.5px;">📅 Lịch Hoạt Động & Chuyên Cần</span>
-                            <div style="font-size:12px; color:var(--text-secondary);">
-                                Tuần này: <strong>${totalStudyHours.toFixed(1)} giờ</strong>
+                    <!-- Flashcard Desk Stats -->
+                    <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; justify-content:space-between;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <span style="font-size:13px; font-weight:700; color:var(--text-primary);">📚 Flashcard Desk</span>
+                                <span style="font-size:11px; font-weight:700; background:rgba(76,175,80,0.1); color:#81c784; padding:2px 6px; border-radius:4px;">Từ vựng</span>
                             </div>
+                            <p style="font-size:12px; color:var(--text-secondary); margin: 0 0 12px 0;">Luyện từ vựng theo phương pháp lặp lại ngắt quãng.</p>
                         </div>
-                        
-                        <!-- Heatmap -->
-                        <div class="calendar-grid">${heatmapHtml}</div>
-                        
-                        <!-- Beautiful custom Legend -->
-                        <div class="legend-row" style="margin-top:16px; display:flex; justify-content:space-around; flex-wrap:wrap; gap:8px; border-top: 1px solid var(--border-color); padding-top:16px;">
-                            <div class="legend-item" style="display:flex; align-items:center; gap:6px;">
-                                <span style="width:18px; height:18px; border-radius:50%; background:rgba(76, 175, 80, 0.12); border:1px solid rgba(76,175,80,0.3); display:inline-flex; align-items:center; justify-content:center;">
-                                    <i data-lucide="check-circle" style="width:10px; height:10px; color:#81c784;"></i>
-                                </span>
-                                <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">Đúng hạn</span>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; color:var(--text-primary); margin-bottom:6px;">
+                                <span>Đã thuộc (Mastered)</span>
+                                <span>${learnedWordsCount}/${totalWordsCount} từ</span>
                             </div>
-                            <div class="legend-item" style="display:flex; align-items:center; gap:6px;">
-                                <span style="width:18px; height:18px; border-radius:50%; background:rgba(255, 152, 0, 0.12); border:1px solid rgba(255,152,0,0.3); display:inline-flex; align-items:center; justify-content:center;">
-                                    <i data-lucide="clock" style="width:10px; height:10px; color:#ffb74d;"></i>
-                                </span>
-                                <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">Nộp muộn</span>
+                            <div style="height:6px; background:rgba(0,0,0,0.06); border-radius:3px; overflow:hidden; margin-bottom:12px;">
+                                <div style="height:100%; width:${totalWordsCount > 0 ? (learnedWordsCount/totalWordsCount)*100 : 0}%; background:#81c784; border-radius:3px;"></div>
                             </div>
-                            <div class="legend-item" style="display:flex; align-items:center; gap:6px;">
-                                <span style="width:18px; height:18px; border-radius:50%; background:rgba(143, 130, 117, 0.04); border:1px dashed rgba(143, 130, 117, 0.3); display:inline-flex; align-items:center; justify-content:center; color:var(--text-tertiary); font-weight:bold; font-size:9px;">
-                                    -
-                                </span>
-                                <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">Tự học linh hoạt</span>
-                            </div>
-                            <div class="legend-item" style="display:flex; align-items:center; gap:6px;">
-                                <span style="width:18px; height:18px; border-radius:50%; background:rgba(143, 130, 117, 0.08); border:1px solid rgba(143, 130, 117, 0.15); display:inline-flex; align-items:center; justify-content:center; font-size:10px;">
-                                    ☕
-                                </span>
-                                <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">Ngày nghỉ</span>
-                            </div>
-                        </div>
-
-                        <!-- Nhật ký timeline -->
-                        <div style="border-top:1px solid var(--border-color); padding-top:20px; margin-top:20px;">
-                            <h5 style="margin:0 0 14px 0; font-size:12.5px; font-weight:800; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.5px;">📋 Nhật Ký Hoạt Động Gần Nhất</h5>
-                            <div style="display:flex; flex-direction:column; gap:4px;">
-                                ${activityTimelineHtml}
+                            <div style="font-size:11px; color:var(--text-tertiary); display:flex; justify-content:space-between;">
+                                <span>Đang học: <strong>${learningWordsCount} từ</strong></span>
+                                <span>Chủ đề xong: <strong>${completedTopicsCount}/${totalTopicsCount}</strong></span>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- RIGHT COLUMN: Macro Tracking & Progress ROI (Hẹp) -->
-                <div style="display:flex; flex-direction:column; gap:20px; width:100%;">
-                    
-                    <!-- A. Bản đồ Chặng đường học tập (Vertical Premium Timeline) -->
-                    <div class="glass-card" style="padding: 24px; display:flex; flex-direction:column; gap:20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                            <span style="font-size:12px; font-weight:800; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:1px;">🏁 Bản Đồ Chặng Đường</span>
-                            <span style="font-size:24px; font-weight:900; color:var(--color-interactive); font-family:var(--font-heading);">${progressPercent}%</span>
-                        </div>
-                        
-                        <div style="position:relative; padding-left:36px; margin: 12px 0 6px 0;">
-                            <!-- Vertical Line -->
-                            <div style="position:absolute; left:10px; top:8px; bottom:8px; width:4px; background:var(--border-color); border-radius:2px;"></div>
-                            <!-- Active Progress line fill -->
-                            <div style="position:absolute; left:10px; top:8px; height:${progressPercent}%; width:4px; background:linear-gradient(180deg, #ff9800, #00b0ff, #4caf50); border-radius:2px; transition:height 0.8s ease;"></div>
-                            
-                            <!-- Step 1 -->
-                            <div style="position:relative; margin-bottom:24px; display:flex; align-items:center; gap:12px;">
-                                <div style="position:absolute; left:-34px; width:20px; height:20px; border-radius:50%; background:${completedCount >= 10 ? '#4caf50' : 'var(--bg-main)'}; border:2px solid ${completedCount >= 10 ? '#4caf50' : 'var(--border-color)'}; display:flex; align-items:center; justify-content:center; z-index:2; box-shadow: ${completedCount >= 10 ? '0 0 8px rgba(76,175,80,0.3)' : 'none'};">
-                                    <i data-lucide="check-circle" style="width:10px; height:10px; color:${completedCount >= 10 ? '#fff' : 'var(--text-tertiary)'};"></i>
-                                </div>
-                                <div>
-                                    <strong style="font-size:13.5px; color:${completedCount >= 10 ? 'var(--text-primary)' : 'var(--text-tertiary)'}; display:block; font-weight:700;">Khởi động (10 đề)</strong>
-                                    <span style="font-size:11px; color:var(--text-tertiary);">Rèn luyện bước đầu, quen thao tác</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Step 2 -->
-                            <div style="position:relative; margin-bottom:24px; display:flex; align-items:center; gap:12px;">
-                                <div style="position:absolute; left:-34px; width:20px; height:20px; border-radius:50%; background:${completedCount >= 25 ? '#4caf50' : completedCount >= 10 ? 'var(--color-interactive)' : 'var(--bg-main)'}; border:2px solid ${completedCount >= 25 ? '#4caf50' : completedCount >= 10 ? 'var(--color-interactive)' : 'var(--border-color)'}; display:flex; align-items:center; justify-content:center; z-index:2; box-shadow: ${completedCount >= 25 ? '0 0 8px rgba(76,175,80,0.3)' : completedCount >= 10 ? '0 0 8px rgba(2,132,199,0.3)' : 'none'};">
-                                    <i data-lucide="${completedCount >= 25 ? 'check-circle' : 'target'}" style="width:10px; height:10px; color:${completedCount >= 10 ? '#fff' : 'var(--text-tertiary)'};"></i>
-                                </div>
-                                <div>
-                                    <strong style="font-size:13.5px; color:${completedCount >= 25 ? 'var(--text-primary)' : completedCount >= 10 ? 'var(--color-interactive)' : 'var(--text-tertiary)'}; display:block; font-weight:700;">Tăng tốc (25 đề)</strong>
-                                    <span style="font-size:11px; color:var(--text-tertiary);">Bứt phá kiến thức trung bình</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Step 3 -->
-                            <div style="position:relative; margin-bottom:24px; display:flex; align-items:center; gap:12px;">
-                                <div style="position:absolute; left:-34px; width:20px; height:20px; border-radius:50%; background:${completedCount >= 40 ? '#4caf50' : completedCount >= 25 ? 'var(--color-interactive)' : 'var(--bg-main)'}; border:2px solid ${completedCount >= 40 ? '#4caf50' : completedCount >= 25 ? 'var(--color-interactive)' : 'var(--border-color)'}; display:flex; align-items:center; justify-content:center; z-index:2; box-shadow: ${completedCount >= 40 ? '0 0 8px rgba(76,175,80,0.3)' : completedCount >= 25 ? '0 0 8px rgba(2,132,199,0.3)' : 'none'};">
-                                    <i data-lucide="${completedCount >= 40 ? 'check-circle' : 'target'}" style="width:10px; height:10px; color:${completedCount >= 25 ? '#fff' : 'var(--text-tertiary)'};"></i>
-                                </div>
-                                <div>
-                                    <strong style="font-size:13.5px; color:${completedCount >= 40 ? 'var(--text-primary)' : completedCount >= 25 ? 'var(--color-interactive)' : 'var(--text-tertiary)'}; display:block; font-weight:700;">Thử thách (40 đề)</strong>
-                                    <span style="font-size:11px; color:var(--text-tertiary);">Rèn luyện phản xạ nâng cao 8+</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Step 4 -->
-                            <div style="position:relative; display:flex; align-items:center; gap:12px;">
-                                <div style="position:absolute; left:-34px; width:20px; height:20px; border-radius:50%; background:${completedCount >= 50 ? '#4caf50' : completedCount >= 40 ? 'var(--color-interactive)' : 'var(--bg-main)'}; border:2px solid ${completedCount >= 50 ? '#4caf50' : completedCount >= 40 ? 'var(--color-interactive)' : 'var(--border-color)'}; display:flex; align-items:center; justify-content:center; z-index:2; box-shadow: ${completedCount >= 50 ? '0 0 8px rgba(76,175,80,0.3)' : completedCount >= 40 ? '0 0 8px rgba(2,132,199,0.3)' : 'none'};">
-                                    <i data-lucide="${completedCount >= 50 ? 'check-circle' : 'award'}" style="width:10px; height:10px; color:${completedCount >= 40 ? '#fff' : 'var(--text-tertiary)'};"></i>
-                                </div>
-                                <div>
-                                    <strong style="font-size:13.5px; color:${completedCount >= 50 ? 'var(--text-primary)' : completedCount >= 40 ? 'var(--color-interactive)' : 'var(--text-tertiary)'}; display:block; font-weight:700;">Về đích (50 đề)</strong>
-                                    <span style="font-size:11px; color:var(--text-tertiary);">Sẵn sàng chinh phục kỳ thi tuyển sinh</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- B. Đồ thị tiến bộ (ROI chart luôn hiển thị) -->
-                    <div class="glass-card" style="padding: 24px; display:flex; flex-direction:column; gap:12px;">
-                        <h4 style="margin:0; font-family:var(--font-heading); font-size:16px; font-weight:700; color:var(--text-primary);">📈 Biểu Đồ ROI Tiến Bộ</h4>
-                        <p style="margin:0; font-size:12px; color:var(--text-tertiary);">${chartTypeLabel}</p>
-                        <div style="height:120px; width:100%; position:relative; margin: 12px 0 6px 0;">
-                            <svg viewBox="0 0 200 100" style="width:100%; height:100%; overflow:visible;">
-                                <defs>
-                                    <linearGradient id="chartGlow" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="var(--color-interactive)" stop-opacity="0.25"/>
-                                        <stop offset="100%" stop-color="var(--color-interactive)" stop-opacity="0.0"/>
-                                    </linearGradient>
-                                </defs>
-                                <line x1="0" y1="80" x2="200" y2="80" stroke="var(--border-color)" stroke-width="1" />
-                                <line x1="0" y1="50" x2="200" y2="50" stroke="var(--border-color)" stroke-width="1" />
-                                <line x1="0" y1="20" x2="200" y2="20" stroke="var(--border-color)" stroke-width="1" />
-                                ${svgPathHtml}${svgDotsHtml}${svgLabelsHtml}${svgValuesHtml}
-                            </svg>
-                        </div>
-                        <div style="font-size:12.5px; color:#81c784; font-weight:600; display:flex; align-items:center; gap:6px; margin-top:8px; line-height:1.4;">
-                            <i data-lucide="sparkles" style="width:14px; height:14px; flex-shrink:0;"></i>
-                            <span>${chartSummaryText}</span>
-                        </div>
-                    </div>
+            <!-- Block 4: Actionable Insights -->
+            <div style="background: #FFFFFF; border: 1px solid #E5E5EA; border-radius: 14px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);">
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-family:var(--font-heading); font-size:15px; font-weight:700; margin:0 0 6px 0; color:var(--text-primary);">4. Điểm Cần Lưu Ý & Hành Động Gợi Ý</h4>
+                    <p style="font-size:13px; color:var(--text-secondary); margin:0;">Chẩn đoán nhược điểm gần nhất và gợi ý tương tác dành cho bố mẹ.</p>
+                </div>
+                
                 </div>
             </div>
         </div>
     `;
+    
+    // Re-initialize lucide icons for the new content
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 }
 function renderAdminVault(container) {
     // Generate rows for existing questions
@@ -7906,10 +7984,11 @@ function saveAppStateToLocalStorage() {
         flashcards: AppState.flashcards || [],
         topics: AppState.topics || [],
         deletedTopicIds: AppState.deletedTopicIds || [],
-        grammarAccuracy: AppState.grammarAccuracy || 74,
-        grammarMastery: AppState.grammarMastery || { tense: 100, passive: 0, conditional: 0, comparison: 0, relative: 0, gerund: 0, connectors: 0, reported_speech: 0, word_form: 0, phrasal_verb: 0 },
-        grammarStatus: AppState.grammarStatus || { tense: 'completed', passive: 'active', conditional: 'active', comparison: 'active', relative: 'active', gerund: 'active', connectors: 'active', reported_speech: 'active', word_form: 'active', phrasal_verb: 'active' },
-        grammarSubTopicsCompleted: AppState.grammarSubTopicsCompleted || {}
+        grammarAccuracy: AppState.grammarAccuracy !== undefined ? AppState.grammarAccuracy : 0,
+        grammarMastery: AppState.grammarMastery || { tense: 0, passive: 0, conditional: 0, comparison: 0, relative: 0, gerund: 0, connectors: 0, reported_speech: 0, word_form: 0, phrasal_verb: 0 },
+        grammarStatus: AppState.grammarStatus || { tense: 'active', passive: 'locked', conditional: 'locked', comparison: 'locked', relative: 'locked', gerund: 'locked', connectors: 'locked', reported_speech: 'locked', word_form: 'locked', phrasal_verb: 'locked' },
+        grammarSubTopicsCompleted: AppState.grammarSubTopicsCompleted || {},
+        wordStatuses: AppState.wordStatuses || {}
     };
     localStorage.setItem('exam_runners_app_state', JSON.stringify(dataToSave));
     
@@ -7939,6 +8018,12 @@ function loadAppStateFromLocalStorage() {
             AppState.completedExams = data.completedExams || {};
             AppState.weaknesses = data.weaknesses || [];
             AppState.activityLog = data.activityLog || [];
+            
+            // Reset activityLog for fresh new users to prevent legacy pre-seeded mock logs
+            if (Object.keys(AppState.completedExams).length === 0 && (!AppState.xp || AppState.xp === 0)) {
+                AppState.activityLog = [];
+            }
+
             AppState.examDate = data.examDate || '';
             AppState.scoreGoal = data.scoreGoal || '8.0';
             AppState.weeklyCommitment = data.weeklyCommitment || '6';
@@ -7953,6 +8038,7 @@ function loadAppStateFromLocalStorage() {
             AppState.grammarMastery = data.grammarMastery || { tense: 0, passive: 0, conditional: 0, comparison: 0, relative: 0, gerund: 0, connectors: 0, reported_speech: 0, word_form: 0, phrasal_verb: 0 };
             AppState.grammarStatus = data.grammarStatus || { tense: 'active', passive: 'locked', conditional: 'locked', comparison: 'locked', relative: 'locked', gerund: 'locked', connectors: 'locked', reported_speech: 'locked', word_form: 'locked', phrasal_verb: 'locked' };
             AppState.grammarSubTopicsCompleted = data.grammarSubTopicsCompleted || {};
+            AppState.wordStatuses = data.wordStatuses || {};
             
             // Dynamically resolve and synchronize chapter statuses from masteries
             if (typeof EXAM_RUNNERS_DB !== "undefined" && EXAM_RUNNERS_DB.grammarTimeline) {
@@ -8022,7 +8108,7 @@ function initOnboarding() {
     modal.classList.add('open');
 
     let currentStep = 1;
-    const totalSteps = 4;
+    const totalSteps = 5;
 
     const nextBtn = document.getElementById('ob-next-btn');
     const prevBtn = document.getElementById('ob-prev-btn');
@@ -8048,6 +8134,19 @@ function initOnboarding() {
     // Next/Prev events
     nextBtn.addEventListener('click', () => {
         if (currentStep === 1) {
+            const sName = document.getElementById('ob-student-name').value.trim();
+            const pName = document.getElementById('ob-parent-name').value.trim();
+            if (!sName || !pName) {
+                alert('Vui lòng nhập đầy đủ Tên Học sinh và Tên Phụ huynh (Bắt buộc)!');
+                return;
+            }
+            AppState.studentName = sName;
+            AppState.parentName = pName;
+            AppState.school = document.getElementById('ob-school').value.trim();
+            AppState.className = document.getElementById('ob-class').value.trim();
+        }
+
+        if (currentStep === 2) {
             const dateInput = document.getElementById('ob-exam-date').value;
             if (!dateInput) {
                 alert('Vui lòng chọn ngày diễn ra kỳ thi của bạn!');
@@ -8060,7 +8159,7 @@ function initOnboarding() {
             currentStep++;
             showStep(currentStep);
         } else {
-            // Validate Step 4 inputs
+            // Validate Step 5 inputs
             const parentPinVal = document.getElementById('ob-parent-pin').value;
             const tutorPinVal = document.getElementById('ob-tutor-pin').value;
             const pinRegex = /^\d{4}$/;
@@ -8084,6 +8183,13 @@ function initOnboarding() {
 
             const activeCommitItem = document.querySelector('.ob-commitment-item.active');
             AppState.weeklyCommitment = activeCommitItem ? activeCommitItem.getAttribute('data-hours') : '6';
+
+            // Fresh start for newly onboarded user
+            AppState.streak = 0;
+            AppState.xp = 0;
+            AppState.activityLog = [];
+            AppState.completedExams = {};
+            document.getElementById('streak-count').innerText = `${AppState.streak} ngày`;
 
             localStorage.setItem('ob_completed', 'true');
             saveAppStateToLocalStorage();
@@ -8144,21 +8250,81 @@ AppState.examHighlights = AppState.examHighlights || {};
 window.applyHighlightsToPassage = function(passageText, passageKey) {
     if (!AppState.examHighlights[passageKey] || AppState.examHighlights[passageKey].length === 0) return passageText;
     
-    let result = passageText;
-    AppState.examHighlights[passageKey].forEach((hl, i) => {
-        let text = "";
-        let color = "yellow";
-        if (typeof hl === 'object' && hl !== null) {
-            text = hl.text;
-            color = hl.color || 'yellow';
-        } else {
-            text = hl;
-        }
-        if (!text) return;
-        const escaped = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        result = result.replace(new RegExp('(' + escaped + ')', 'g'), `<span class="user-highlight hl-${color}" onclick="removeHighlight('${passageKey}', ${i}, event)">$1</span>`);
+    // Convert to array of highlight objects with offsets
+    let highlights = AppState.examHighlights[passageKey].map((hl, i) => {
+        let text = typeof hl === 'object' && hl !== null ? hl.text : hl;
+        let color = typeof hl === 'object' && hl !== null ? (hl.color || 'yellow') : 'yellow';
+        return {
+            text: text,
+            color: color,
+            start: typeof hl === 'object' && hl.start !== undefined ? hl.start : -1,
+            end: typeof hl === 'object' && hl.end !== undefined ? hl.end : -1,
+            originalIndex: i
+        };
     });
+    
+    // For legacy highlights (without start/end), fallback to finding the first occurrence
+    highlights.forEach(hl => {
+        if (hl.start === -1 && hl.text) {
+            let idx = passageText.indexOf(hl.text);
+            if (idx !== -1) {
+                hl.start = idx;
+                hl.end = idx + hl.text.length;
+            }
+        }
+    });
+    
+    // Filter out invalid ones
+    highlights = highlights.filter(hl => hl.start !== -1 && hl.start !== undefined);
+    
+    // Sort by start index
+    highlights.sort((a, b) => a.start - b.start);
+    
+    // Build the result string by slicing the original passageText
+    let result = "";
+    let currentIndex = 0;
+    
+    highlights.forEach(hl => {
+        // Skip overlapping highlights to prevent HTML corruption
+        if (hl.start < currentIndex) return;
+
+        // Add text before highlight
+        result += passageText.substring(currentIndex, hl.start);
+        // Add highlighted text
+        result += `<span class="user-highlight hl-${hl.color}" onclick="removeHighlight('${passageKey}', ${hl.originalIndex}, event)">`;
+        result += passageText.substring(hl.start, hl.end);
+        result += `</span>`;
+        
+        currentIndex = hl.end;
+    });
+    
+    // Add remaining text
+    result += passageText.substring(currentIndex);
+    
     return result;
+}
+
+// Helper to get exact offsets within a text container
+function getSelectionCharacterOffsetWithin(element) {
+    let start = 0;
+    let end = 0;
+    let doc = element.ownerDocument || element.document;
+    let win = doc.defaultView || doc.parentWindow;
+    let sel;
+    if (typeof win.getSelection !== "undefined") {
+        sel = win.getSelection();
+        if (sel.rangeCount > 0) {
+            let range = sel.getRangeAt(0);
+            let preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(element);
+            preCaretRange.setEnd(range.startContainer, range.startOffset);
+            start = preCaretRange.toString().length;
+            
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            end = preCaretRange.toString().length;
+        }
+    }
+    return { start: start, end: end };
 }
 
 window.handlePassageSelection = function(e, passageKey, elementId) {
@@ -8169,6 +8335,13 @@ window.handlePassageSelection = function(e, passageKey, elementId) {
     
     const text = sel.toString().trim();
     if (text.length < 2) return; 
+
+    const passageEl = document.getElementById(elementId);
+    let offsets = { start: -1, end: -1 };
+    if (passageEl) {
+        offsets = getSelectionCharacterOffsetWithin(passageEl);
+    }
+    const rawTextSelection = sel.toString();
 
     const existing = document.querySelector('.highlight-popover');
     if (existing) existing.remove();
@@ -8193,14 +8366,21 @@ window.handlePassageSelection = function(e, passageKey, elementId) {
             
             if (!AppState.examHighlights[passageKey]) AppState.examHighlights[passageKey] = [];
             
-            // Check if text already highlighted
+            // Check if exact text position already highlighted
             const alreadyExists = AppState.examHighlights[passageKey].some(hl => {
-                if (typeof hl === 'object') return hl.text === text;
-                return hl === text;
+                if (hl.start !== undefined && offsets.start !== -1) {
+                    return hl.start === offsets.start && hl.end === offsets.end;
+                }
+                return hl.text === rawTextSelection;
             });
             
             if (!alreadyExists) {
-                AppState.examHighlights[passageKey].push({ text: text, color: color });
+                AppState.examHighlights[passageKey].push({ 
+                    text: rawTextSelection, 
+                    color: color,
+                    start: offsets.start,
+                    end: offsets.end
+                });
                 saveAppStateToLocalStorage();
             }
             
@@ -8288,28 +8468,7 @@ function seedActivityLogIfEmpty() {
             });
         });
     } else {
-        // seed mock activities to make parent view beautiful right away
-        const date1 = new Date();
-        date1.setDate(today.getDate() - 3);
-        AppState.activityLog.push({
-            type: 'flashcard',
-            title: 'Luyện tập ôn từ vựng (Chủ đề Học tập & Công nghệ)',
-            score: 85,
-            timestamp: date1.toISOString(),
-            durationMinutes: 15,
-            status: 'ontime'
-        });
-
-        const date2 = new Date();
-        date2.setDate(today.getDate() - 1);
-        AppState.activityLog.push({
-            type: 'grammar',
-            title: 'Luyện tập Ngữ pháp (Thì Quá khứ hoàn thành)',
-            score: 90,
-            timestamp: date2.toISOString(),
-            durationMinutes: 20,
-            status: 'ontime'
-        });
+        // Disabled seeding mock activities to prevent confusion with 0-day streaks and fake chart data.
     }
     
     // Save to local storage
@@ -8328,9 +8487,9 @@ function seedActivityLogIfEmpty() {
         flashcards: AppState.flashcards || [],
         topics: AppState.topics || [],
         deletedTopicIds: AppState.deletedTopicIds || [],
-        grammarAccuracy: AppState.grammarAccuracy || 74,
-        grammarMastery: AppState.grammarMastery || { tense: 100, passive: 0, conditional: 0, comparison: 0, relative: 0, gerund: 0, connectors: 0, reported_speech: 0, word_form: 0, phrasal_verb: 0 },
-        grammarStatus: AppState.grammarStatus || { tense: 'completed', passive: 'active', conditional: 'active', comparison: 'active', relative: 'active', gerund: 'active', connectors: 'active', reported_speech: 'active', word_form: 'active', phrasal_verb: 'active' },
+        grammarAccuracy: AppState.grammarAccuracy !== undefined ? AppState.grammarAccuracy : 0,
+        grammarMastery: AppState.grammarMastery || { tense: 0, passive: 0, conditional: 0, comparison: 0, relative: 0, gerund: 0, connectors: 0, reported_speech: 0, word_form: 0, phrasal_verb: 0 },
+        grammarStatus: AppState.grammarStatus || { tense: 'active', passive: 'locked', conditional: 'locked', comparison: 'locked', relative: 'locked', gerund: 'locked', connectors: 'locked', reported_speech: 'locked', word_form: 'locked', phrasal_verb: 'locked' },
         grammarSubTopicsCompleted: AppState.grammarSubTopicsCompleted || {}
     };
     localStorage.setItem('exam_runners_app_state', JSON.stringify(dataToSave));

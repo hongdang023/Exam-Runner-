@@ -558,7 +558,7 @@ const EXAM_RUNNERS_DB = {
         "id": 19,
         "skill": "Synonyms & Antonyms",
         "subskill": "Closest Meaning",
-        "stem": "The Internet is available only in cities and towns, so we cannot easily get access to it in the countryside.",
+        "stem": "The Internet is <u>available</u> only in cities and towns, so we cannot easily get access to it in the countryside.",
         "type": "multiple_choice",
         "correct": "B",
         "recallPuzzle": {
@@ -588,7 +588,7 @@ const EXAM_RUNNERS_DB = {
         "id": 20,
         "skill": "Synonyms & Antonyms",
         "subskill": "Closest Meaning",
-        "stem": "The naughty boy was scolded for breaking the neighbour's window yesterday.",
+        "stem": "The naughty boy was <u>scolded</u> for breaking the neighbour's window yesterday.",
         "type": "multiple_choice",
         "correct": "A",
         "recallPuzzle": {
@@ -648,7 +648,7 @@ const EXAM_RUNNERS_DB = {
         "id": 22,
         "skill": "Synonyms & Antonyms",
         "subskill": "Opposite Meaning",
-        "stem": "When you put on clothing or make-up, you place it on your body in order to wear it.",
+        "stem": "When you <u>put on</u> clothing or make-up, you place it on your body in order to wear it.",
         "type": "multiple_choice",
         "correct": "A",
         "recallPuzzle": {
@@ -58930,35 +58930,6 @@ const EXAM_RUNNERS_DB = {
     // Spaced Repetition Flashcard Topics
     topics: [
         {
-                "id": "env",
-                "name": "Environment & Nature",
-                "desc": "Chủ đề Môi trường & Thiên nhiên - Rất quan trọng trong các bài đọc hiểu kỳ thi vào 10.",
-                "words": [
-                        1,
-                        5,
-                        6
-                ]
-        },
-        {
-                "id": "grammar-vocab",
-                "name": "Common Grammar Vocab",
-                "desc": "Các động từ, tính từ thông dụng thường gặp trong phần trắc nghiệm ngữ pháp & từ vựng.",
-                "words": [
-                        2,
-                        7,
-                        8
-                ]
-        },
-        {
-                "id": "phrasal",
-                "name": "Phrasal Verbs & Idioms",
-                "desc": "Cụm động từ và thành ngữ phổ biến để đạt điểm tối đa câu hỏi phân loại cao.",
-                "words": [
-                        3,
-                        4
-                ]
-        },
-        {
                 "id": "env_conservation",
                 "name": "The Environment & Conservation",
                 "desc": "Chủ đề The Environment & Conservation (Môi trường & Bảo tồn) - Trọng tâm ôn thi tuyển sinh vào lớp 10.",
@@ -61116,9 +61087,9 @@ const EXAM_RUNNERS_DB = {
                     {
                         name: "Thì Hiện tại đơn (Present Simple)",
                         formula: {
-                            affirmative: "(+) S + V(s/es) / S + am/is/are",
-                            negative: "(-) S + don't/doesn't + V-inf / S + am/is/are + not",
-                            interrogative: "(?) Do/Does + S + V-inf? / Am/Is/Are + S...?"
+                            affirmative: "• Với Động từ thường: S + V(s/es)<br>• Với Động từ TO BE: S + am/is/are",
+                            negative: "• Với Động từ thường: S + don't/doesn't + V-inf<br>• Với Động từ TO BE: S + am/is/are + not",
+                            interrogative: "• Với Động từ thường: Do/Does + S + V-inf?<br>• Với Động từ TO BE: Am/Is/Are + S...?"
                         },
                         usage: "Diễn tả thói quen lặp đi lặp lại hoặc sự thật hiển nhiên.",
                         signals: "always, usually, often, sometimes, everyday, once a week",
@@ -61126,19 +61097,28 @@ const EXAM_RUNNERS_DB = {
                         trap: "Quên thêm 's/es' với chủ ngữ số ít (he, she, it) trong câu khẳng định.",
                         tip: "Thấy trạng từ tần suất hoặc chân lý hiển nhiên -> chọn ngay Hiện tại đơn!",
                         examples: [
-                            { sentence: "She walks to school every day.", translation: "Cô ấy đi bộ đến trường mỗi ngày.", explanation: "Chủ ngữ số ít 'She' yêu cầu động từ thêm 's'." },
-                            { sentence: "The sun rises in the East.", translation: "Mặt trời mọc ở hướng Đông.", explanation: "Diễn tả chân lý hiển nhiên, chia hiện tại đơn." },
-                            { sentence: "They do not drink coffee in the evening.", translation: "Họ không uống cà phê vào buổi tối.", explanation: "Câu phủ định với chủ ngữ số nhiều mượn trợ động từ 'do not'." }
+                            { sentence: "She walks to school every day.", translation: "Cô ấy đi bộ đến trường mỗi ngày.", explanation: "Chủ ngữ số ít 'She' yêu cầu động từ thêm 's'.", forCase: "Động từ thường" },
+                            { sentence: "The sun rises in the East.", translation: "Mặt trời mọc ở hướng Đông.", explanation: "Diễn tả chân lý hiển nhiên, chia hiện tại đơn.", forCase: "Động từ thường" },
+                            { sentence: "They do not drink coffee in the evening.", translation: "Họ không uống cà phê vào buổi tối.", explanation: "Câu phủ định với chủ ngữ số nhiều mượn trợ động từ 'do not'.", forCase: "Động từ thường" },
+                            { sentence: "I am a student at a local high school.", translation: "Tôi là một học sinh tại một trường cấp ba ở địa phương.", explanation: "Chủ ngữ 'I' đi với động từ to be 'am'.", forCase: "Động từ TO BE" },
+                            { sentence: "They are not at home right now.", translation: "Họ không có ở nhà vào lúc này.", explanation: "Câu phủ định của to be với chủ ngữ số nhiều 'They' đi với 'are not'.", forCase: "Động từ TO BE" },
+                            { sentence: "Is she your English teacher?", translation: "Cô ấy có phải là giáo viên tiếng Anh của bạn không?", explanation: "Câu nghi vấn của to be: Đưa 'Is' lên trước chủ ngữ 'she'.", forCase: "Động từ TO BE" }
                         ],
                         counterExamples: [
-                            { sentence: "She walk to school every day.", correction: "She walks to school every day.", rule: "Thiếu 's' cho động từ đi với chủ ngữ ngôi thứ ba số ít." },
-                            { sentence: "He don't like milk.", correction: "He doesn't like milk.", rule: "Dùng sai trợ động từ phủ định với chủ ngữ số ít (doesn't)." },
-                            { sentence: "Do she live in Hanoi?", correction: "Does she live in Hanoi?", rule: "Dùng sai trợ động từ nghi vấn cho chủ ngữ số ít (does)." }
+                            { sentence: "She walk to school every day.", correction: "She walks to school every day.", rule: "Thiếu 's' cho động từ đi với chủ ngữ ngôi thứ ba số ít.", forCase: "Động từ thường" },
+                            { sentence: "He don't like milk.", correction: "He doesn't like milk.", rule: "Dùng sai trợ động từ phủ định với chủ ngữ số ít (doesn't).", forCase: "Động từ thường" },
+                            { sentence: "Do she live in Hanoi?", correction: "Does she live in Hanoi.", rule: "Dùng sai trợ động từ nghi vấn cho chủ ngữ số ít (does).", forCase: "Động từ thường" },
+                            { sentence: "She is not walks to school.", correction: "She doesn't walk to school.", rule: "Nhầm lẫn dùng 'is not' cho động từ thường (walk) thay vì trợ động từ 'doesn't'.", forCase: "Động từ thường" },
+                            { sentence: "They is very friendly.", correction: "They are very friendly.", rule: "Dùng sai động từ to be 'is' cho chủ ngữ số nhiều 'They'.", forCase: "Động từ TO BE" },
+                            { sentence: "Are she happy with the result?", correction: "Is she happy with the result?", rule: "Dùng sai động từ to be 'Are' cho chủ ngữ số ít 'she'.", forCase: "Động từ TO BE" },
+                            { sentence: "I am not like spicy food.", correction: "I don't like spicy food.", rule: "Dùng to be 'am not' đi với động từ thường 'like'. Phải mượn trợ động từ 'don't'.", forCase: "Động từ thường" }
                         ],
                         commonMistakes: [
-                            { title: "Lỗi thêm 's/es' vô điều kiện", detail: "Thêm 's' vào cả động từ đi với chủ ngữ số nhiều (ví dụ: They plays).", fix: "Chỉ thêm 's/es' với chủ ngữ He, She, It hoặc danh từ số ít." },
-                            { title: "Nhầm lẫn giữa Động từ thường và To Be", detail: "Viết câu có cả hai động từ ở dạng chia (ví dụ: She is walk to school).", fix: "Hiện tại đơn chỉ dùng một trong hai: động từ thường HOẶC to be." },
-                            { title: "Quên đưa động từ về nguyên mẫu sau trợ động từ", detail: "Viết câu phủ định/nghi vấn vẫn chia động từ (ví dụ: He doesn't likes coffee).", fix: "Khi đã mượn does/doesn't, động từ chính bắt buộc phải ở dạng nguyên mẫu không chia." }
+                            { title: "Lỗi thêm 's/es' vô điều kiện", detail: "Thêm 's' vào cả động từ đi với chủ ngữ số nhiều (ví dụ: They plays).", fix: "Chỉ thêm 's/es' với chủ ngữ He, She, It hoặc danh từ số ít.", forCase: "Động từ thường" },
+                            { title: "Nhầm lẫn giữa Động từ thường và To Be", detail: "Viết câu có cả hai động từ ở dạng chia (ví dụ: She is walk to school).", fix: "Hiện tại đơn chỉ dùng một trong hai: động từ thường HOẶC to be.", forCase: "Động từ thường" },
+                            { title: "Quên đưa động từ về nguyên mẫu sau trợ động từ", detail: "Viết câu phủ định/nghi vấn vẫn chia động từ (ví dụ: He doesn't likes coffee).", fix: "Khi đã mượn does/doesn't, động từ chính bắt buộc phải ở dạng nguyên mẫu không chia.", forCase: "Động từ thường" },
+                            { title: "Dùng sai dạng của To Be", detail: "Dùng 'am/is/are' không tương thích với chủ ngữ (ví dụ: I is, they is).", fix: "Nhớ quy tắc chia: I + am, He/She/It/Danh từ số ít + is, You/We/They/Danh từ số nhiều + are.", forCase: "Động từ TO BE" },
+                            { title: "Thêm s/es vào sau động từ To Be", detail: "Viết câu như 'She iss' hoặc 'He ares'.", fix: "Động từ to be đã có dạng chia cố định (am/is/are), tuyệt đối không thêm s/es vào sau.", forCase: "Động từ TO BE" }
                         ]
                     },
                     {
@@ -61200,9 +61180,9 @@ const EXAM_RUNNERS_DB = {
                     {
                         name: "Thì Quá khứ đơn (Past Simple)",
                         formula: {
-                            affirmative: "(+) S + V2/ed / S + was/were",
-                            negative: "(-) S + didn't + V-inf / S + was/were + not",
-                            interrogative: "(?) Did + S + V-inf? / Was/Were + S...?"
+                            affirmative: "• Với Động từ thường: S + V2/ed<br>• Với Động từ TO BE: S + was/were",
+                            negative: "• Với Động từ thường: S + didn't + V-inf<br>• Với Động từ TO BE: S + was/were + not",
+                            interrogative: "• Với Động từ thường: Did + S + V-inf?<br>• Với Động từ TO BE: Was/Were + S...?"
                         },
                         usage: "Diễn tả hành động đã xảy ra và kết thúc hoàn toàn trong quá khứ.",
                         signals: "yesterday, ago, last week, in + năm quá khứ",
@@ -61210,19 +61190,26 @@ const EXAM_RUNNERS_DB = {
                         trap: "Sai dạng động từ bất quy tắc (ví dụ: write -> writed thay vì wrote).",
                         tip: "Thấy mốc thời gian đã qua trong quá khứ (last, ago, yesterday) -> chia ngay Quá khứ đơn!",
                         examples: [
-                            { sentence: "He bought a new laptop yesterday.", translation: "Anh ấy đã mua một chiếc máy tính xách tay mới vào ngày hôm qua.", explanation: "Hành động mua laptop kết thúc hoàn toàn vào hôm qua ('yesterday')." },
-                            { sentence: "They visited Paris in 2019.", translation: "Họ đã đến thăm Paris vào năm 2019.", explanation: "Năm 2019 là mốc thời gian xác định trong quá khứ." },
-                            { sentence: "Where did you go last night?", translation: "Bạn đã đi đâu tối qua?", explanation: "Câu hỏi quá khứ đơn mượn trợ động từ 'did' và đưa động từ chính về nguyên mẫu." }
+                            { sentence: "He bought a new laptop yesterday.", translation: "Anh ấy đã mua một chiếc máy tính xách tay mới vào ngày hôm qua.", explanation: "Hành động mua laptop kết thúc hoàn toàn vào hôm qua ('yesterday').", forCase: "Động từ thường" },
+                            { sentence: "They visited Paris in 2019.", translation: "Họ đã đến thăm Paris vào năm 2019.", explanation: "Năm 2019 là mốc thời gian xác định trong quá khứ.", forCase: "Động từ thường" },
+                            { sentence: "Where did you go last night?", translation: "Bạn đã đi đâu tối qua?", explanation: "Câu hỏi quá khứ đơn mượn trợ động từ 'did' và đưa động từ chính về nguyên mẫu.", forCase: "Động từ thường" },
+                            { sentence: "She was very happy with her exam result.", translation: "Cô ấy đã rất vui với kết quả kỳ thi của mình.", explanation: "Chủ ngữ số ít 'She' đi với was.", forCase: "Động từ TO BE" },
+                            { sentence: "They were not at school last Sunday.", translation: "Họ không có ở trường vào chủ nhật tuần trước.", explanation: "Câu phủ định của to be trong quá khứ với chủ ngữ số nhiều 'They' đi với were not.", forCase: "Động từ TO BE" },
+                            { sentence: "Were you tired after the long trip?", translation: "Bạn có mệt sau chuyến đi dài không?", explanation: "Câu hỏi của to be trong quá khứ đưa 'Were' lên trước chủ ngữ 'you'.", forCase: "Động từ TO BE" }
                         ],
                         counterExamples: [
-                            { sentence: "She didn't bought the book.", correction: "She didn't buy the book.", rule: "Động từ chính phải ở dạng nguyên mẫu (buy) sau trợ động từ phủ định 'didn't'." },
-                            { sentence: "He writed a letter to his friend.", correction: "He wrote a letter to his friend.", rule: "Write là động từ bất quy tắc, dạng V2 của nó là 'wrote' chứ không thêm '-ed'." },
-                            { sentence: "Where were you went yesterday?", correction: "Where did you go yesterday?", rule: "Không dùng cả to be quá khứ và động từ thường cùng chia trong câu nghi vấn." }
+                            { sentence: "She didn't bought the book.", correction: "She didn't buy the book.", rule: "Động từ chính phải ở dạng nguyên mẫu (buy) sau trợ động từ phủ định 'didn't'.", forCase: "Động từ thường" },
+                            { sentence: "He writed a letter to his friend.", correction: "He wrote a letter to his friend.", rule: "Write là động từ bất quy tắc, dạng V2 của nó là 'wrote' chứ không thêm '-ed'.", forCase: "Động từ thường" },
+                            { sentence: "Where were you went yesterday?", correction: "Where did you go yesterday?", rule: "Không dùng cả to be quá khứ và động từ thường cùng chia trong câu nghi vấn.", forCase: "Động từ thường" },
+                            { sentence: "They was very busy yesterday.", correction: "They were very busy yesterday.", rule: "Chủ ngữ số nhiều 'They' đi với 'were' chứ không phải 'was'.", forCase: "Động từ TO BE" },
+                            { sentence: "She wasn't at the party.", correction: "She wasn't at the party.", rule: "Với động từ TO BE trong quá khứ, ta thêm 'not' trực tiếp sau was/were chứ không mượn trợ động từ 'didn't'.", forCase: "Động từ TO BE" },
+                            { sentence: "Did you were tired yesterday?", correction: "Were you tired yesterday?", rule: "Với động từ TO BE trong quá khứ, ta đảo was/were lên trước chủ ngữ chứ không dùng trợ động từ 'Did'.", forCase: "Động từ TO BE" }
                         ],
                         commonMistakes: [
-                            { title: "Giữ nguyên chia động từ sau 'didn't'", detail: "Viết câu phủ định vẫn giữ V2/ed (ví dụ: I didn't went out).", fix: "Sau didn't, bắt buộc động từ chính phải ở nguyên mẫu (I didn't go out)." },
-                            { title: "Thêm '-ed' sai quy tắc bất quy tắc", detail: "Thêm '-ed' vào động từ bất quy tắc (ví dụ: runned, eated, seed).", fix: "Phải tra cứu và học thuộc bảng động từ bất quy tắc (ran, ate, saw)." },
-                            { title: "Dùng sai 'was' và 'were'", detail: "Dùng 'They was' hoặc 'He were'.", fix: "Was đi với I/He/She/It/Danh từ số ít; Were đi với You/We/They/Danh từ số nhiều." }
+                            { title: "Giữ nguyên chia động từ sau 'didn't'", detail: "Viết câu phủ định vẫn giữ V2/ed (ví dụ: I didn't went out).", fix: "Sau didn't, bắt buộc động từ chính phải ở nguyên mẫu (I didn't go out).", forCase: "Động từ thường" },
+                            { title: "Thêm '-ed' sai quy tắc bất quy tắc", detail: "Thêm '-ed' vào động từ bất quy tắc (ví dụ: runned, eated, seed).", fix: "Phải tra cứu và học thuộc bảng động từ bất quy tắc (ran, ate, saw).", forCase: "Động từ thường" },
+                            { title: "Dùng sai 'was' và 'were'", detail: "Dùng 'They was' hoặc 'He were'.", fix: "Was đi với I/He/She/It/Danh từ số ít; Were đi với You/We/They/Danh từ số nhiều.", forCase: "Động từ TO BE" },
+                            { title: "Mượn trợ động từ 'didn't' cho động từ to be", detail: "Viết 'I didn't be' hoặc 'She didn't was'.", fix: "Với to be, chỉ cần thêm not trực tiếp: wasn't / weren't.", forCase: "Động từ TO BE" }
                         ]
                     },
                     {
@@ -61456,22 +61443,25 @@ const EXAM_RUNNERS_DB = {
                         title: "Điều kiện Loại 1",
                         desc: "Giả định có thật ở hiện tại hoặc tương lai.",
                         formula: {
-                            affirmative: "(+) If + S + V(s/es), S + will/can + V-inf",
-                            negative: "(-) If + S + don't/doesn't + V-inf, S + won't/can't + V-inf",
-                            interrogative: "(?) If + S + V(s/es), will/can + S + V-inf?"
+                            affirmative: "• Với Động từ thường: If + S + V(s/es), S + will/can + V-inf<br>• Với Động từ TO BE: If + S + am/is/are, S + will/can + V-inf",
+                            negative: "• Với Động từ thường: If + S + don't/doesn't + V-inf, S + won't/can't + V-inf<br>• Với Động từ TO BE: If + S + am/is/are + not, S + won't/can't + V-inf",
+                            interrogative: "• Với Động từ thường: If + S + V(s/es), will/can + S + V-inf?<br>• Với Động từ TO BE: If + S + am/is/are, will/can + S + V-inf?"
                         },
                         example: "If it rains tomorrow, we will stay at home.",
                         trap: "Dùng 'will' ngay trong mệnh đề IF (sai ngữ pháp nghiêm trọng).",
                         tip: "Mệnh đề IF chia hiện tại đơn, mệnh đề chính dùng will/can.",
                         examples: [
-                            { sentence: "If you study hard, you will pass the exam.", translation: "Nếu bạn học hành chăm chỉ, bạn sẽ đỗ kỳ thi.", explanation: "Điều kiện có thể xảy ra ở tương lai, vế If chia Hiện tại đơn, vế chính dùng 'will + V-inf'." },
-                            { sentence: "If she doesn't hurry, she will miss the bus.", translation: "Nếu cô ấy không khẩn trương, cô ấy sẽ lỡ chuyến xe buýt.", explanation: "Câu phủ định ở điều kiện loại 1: 'doesn't + V-inf' và 'will + V-inf'." },
-                            { sentence: "Unless you practice, you cannot speak well.", translation: "Trừ khi bạn thực hành, bạn không thể nói tốt được.", explanation: "'Unless' tương đương với 'If not', theo sau bởi câu khẳng định." }
+                            { sentence: "If you study hard, you will pass the exam.", translation: "Nếu bạn học hành chăm chỉ, bạn sẽ đỗ kỳ thi.", explanation: "Điều kiện có thể xảy ra ở tương lai, vế If chia Hiện tại đơn, vế chính dùng 'will + V-inf'.", forCase: "Động từ thường" },
+                            { sentence: "If she doesn't hurry, she will miss the bus.", translation: "Nếu cô ấy không khẩn trương, cô ấy sẽ lỡ chuyến xe buýt.", explanation: "Câu phủ định ở điều kiện loại 1: 'doesn't + V-inf' và 'will + V-inf'.", forCase: "Động từ thường" },
+                            { sentence: "Unless you practice, you cannot speak well.", translation: "Trừ khi bạn thực hành, bạn không thể nói tốt được.", explanation: "'Unless' tương đương với 'If not', theo sau bởi câu khẳng định.", forCase: "Động từ thường" },
+                            { sentence: "If she is busy, we will start the meeting without her.", translation: "Nếu cô ấy bận, chúng tôi sẽ bắt đầu cuộc họp mà không có cô ấy.", explanation: "Mệnh đề chứa If chia động từ to be ở hiện tại đơn (is).", forCase: "Động từ TO BE" },
+                            { sentence: "If you are ready, let's go now.", translation: "Nếu bạn đã sẵn sàng, chúng ta đi ngay nào.", explanation: "Mệnh đề chứa If chia động từ to be ở hiện tại đơn (are) đi với tính từ 'ready'.", forCase: "Động từ TO BE" }
                         ],
                         counterExamples: [
-                            { sentence: "If you will study hard, you will pass the exam.", correction: "If you study hard, you will pass the exam.", rule: "Tuyệt đối không sử dụng 'will' trong mệnh đề chứa 'If'." },
-                            { sentence: "If he don't hurry, he will be late.", correction: "If he doesn't hurry, he will be late.", rule: "Chủ ngữ ngôi thứ ba số ít 'he' yêu cầu trợ động từ phủ định 'doesn't' ở Hiện tại đơn." },
-                            { sentence: "Unless you don't study, you will fail.", correction: "Unless you study, you will fail.", rule: "'Unless' mang nghĩa phủ định, mệnh đề sau nó phải ở dạng khẳng định." }
+                            { sentence: "If you will study hard, you will pass the exam.", correction: "If you study hard, you will pass the exam.", rule: "Tuyệt đối không sử dụng 'will' trong mệnh đề chứa 'If'.", forCase: "Động từ thường" },
+                            { sentence: "If he don't hurry, he will be late.", correction: "If he doesn't hurry, he will be late.", rule: "Chủ ngữ ngôi thứ ba số ít 'he' yêu cầu trợ động từ phủ định 'doesn't' ở Hiện tại đơn.", forCase: "Động từ thường" },
+                            { sentence: "Unless you don't study, you will fail.", correction: "Unless you study, you will fail.", rule: "'Unless' mang nghĩa phủ định, mệnh đề sau nó phải ở dạng khẳng định.", forCase: "Động từ thường" },
+                            { sentence: "If she will be busy, we will start the meeting.", correction: "If she is busy, we will start the meeting.", rule: "Không dùng 'will' trong mệnh đề IF của câu điều kiện loại 1.", forCase: "Động từ TO BE" }
                         ],
                         commonMistakes: [
                             { title: "Dùng 'will' trong mệnh đề IF", detail: "Viết 'If I will have time, I will visit you'.", fix: "Mệnh đề chứa IF ở loại 1 luôn dùng thì Hiện tại đơn." },
@@ -61483,25 +61473,26 @@ const EXAM_RUNNERS_DB = {
                         title: "Điều kiện Loại 2",
                         desc: "Giả định TRÁI THỰC TẾ ở hiện tại (động từ To Be dùng WERE cho mọi ngôi).",
                         formula: {
-                            affirmative: "(+) If + S + V2/ed (to be -> were), S + would/could + V-inf",
-                            negative: "(-) If + S + didn't + V-inf (to be -> were not), S + wouldn't/couldn't + V-inf",
-                            interrogative: "(?) If + S + V2/ed, would/could + S + V-inf?"
+                            affirmative: "• Với Động từ thường: If + S + V2/ed, S + would/could + V-inf<br>• Với Động từ TO BE: If + S + were, S + would/could + V-inf",
+                            negative: "• Với Động từ thường: If + S + didn't + V-inf, S + wouldn't/couldn't + V-inf<br>• Với Động từ TO BE: If + S + were not, S + wouldn't/couldn't + V-inf",
+                            interrogative: "• Với Động từ thường: If + S + V2/ed, would/could + S + V-inf?<br>• Với Động từ TO BE: If + S + were, would/could + S + V-inf?"
                         },
                         example: "If I were you, I would take that course.",
                         trap: "Dùng 'was' thay vì 'were' trong bài thi viết học thuật.",
                         tip: "Cứ giả định trái thực tế -> dùng WERE cho mọi ngôi chủ ngữ.",
                         examples: [
-                            { sentence: "If I were you, I would take that course.", translation: "Nếu tôi là bạn, tôi sẽ tham gia khóa học đó.", explanation: "Giả định trái thực tế ở hiện tại (tôi không thể là bạn), dùng 'were' cho chủ ngữ I." },
-                            { sentence: "If she had more money, she could buy a car.", translation: "Nếu cô ấy có nhiều tiền hơn, cô ấy có thể mua một chiếc xe hơi.", explanation: "Thực tế cô ấy không có tiền, vế If chia quá khứ 'had', vế chính dùng 'could buy'." },
-                            { sentence: "If they didn't live so far away, they would visit us.", translation: "Nếu họ không sống ở xa như vậy, họ sẽ đến thăm chúng tôi.", explanation: "Thực tế họ sống xa, giả định ngược lại dùng quá khứ phủ định 'didn't live'." }
+                            { sentence: "If I were you, I would take that course.", translation: "Nếu tôi là bạn, tôi sẽ tham gia khóa học đó.", explanation: "Giản định trái thực tế ở hiện tại (tôi không thể là bạn), dùng 'were' cho chủ ngữ I.", forCase: "Động từ TO BE" },
+                            { sentence: "If he were here, he would help us.", translation: "Nếu anh ấy ở đây, anh ấy sẽ giúp chúng tôi.", explanation: "Giả định trái thực tế ở hiện tại với chủ ngữ số ít 'he' đi với động từ to be 'were'.", forCase: "Động từ TO BE" },
+                            { sentence: "She wishes she had a computer now.", translation: "Cô ấy ước gì cô ấy có một chiếc máy tính bây giờ.", explanation: "Thực tế hiện tại cô ấy không có máy tính, lùi thì thành 'had'.", forCase: "Động từ thường" },
+                            { sentence: "If they didn't live so far away, they would visit us.", translation: "Nếu họ không sống ở xa như vậy, họ sẽ đến thăm chúng tôi.", explanation: "Thực tế họ sống xa, giả định ngược lại dùng quá khứ phủ định 'didn't live'.", forCase: "Động từ thường" }
                         ],
                         counterExamples: [
-                            { sentence: "If I was rich, I would buy a house.", correction: "If I were rich, I would buy a house.", rule: "Trong mệnh đề If loại 2, động từ 'to be' bắt buộc dùng 'were' cho tất cả các ngôi chủ ngữ." },
-                            { sentence: "If she has time, she would help us.", correction: "If she had time, she would help us.", rule: "Vế chính dùng 'would' biểu thị loại 2, vế If phải lùi thì về Quá khứ đơn (had)." },
-                            { sentence: "If I won the lottery, I will travel the world.", correction: "If I won the lottery, I would travel the world.", rule: "Vế If ở Quá khứ đơn (won) biểu thị loại 2, vế chính phải dùng 'would' chứ không dùng 'will'." }
+                            { sentence: "If I was rich, I would buy a house.", correction: "If I were rich, I would buy a house.", rule: "Trong mệnh đề If loại 2, động từ 'to be' bắt buộc dùng 'were' cho tất cả các ngôi chủ ngữ.", forCase: "Động từ TO BE" },
+                            { sentence: "If she has time, she would help us.", correction: "If she had time, she would help us.", rule: "Vế chính dùng 'would' biểu thị loại 2, vế If phải lùi thì về Quá khứ đơn (had).", forCase: "Động từ thường" },
+                            { sentence: "If I won the lottery, I will travel the world.", correction: "If I won the lottery, I would travel the world.", rule: "Vế If ở Quá khứ đơn (won) biểu thị loại 2, vế chính phải dùng 'would' chứ không dùng 'will'.", forCase: "Động từ thường" }
                         ],
                         commonMistakes: [
-                            { title: "Dùng 'was' cho I, He, She, It", detail: "Viết 'If he was here' trong câu điều kiện loại 2.", fix: "Đề thi học thuật vào 10 chỉ chấp nhận 'WERE' cho mọi ngôi." },
+                            { title: "Dùng 'was' cho I, He, She, It", detail: "Viết 'If he was here' trong câu điều kiện loại 2.", fix: "Đề thi học thuật vào 10 chỉ chấp nhận 'WERE' cho mọi ngôi.", forCase: "Động từ TO BE" },
                             { title: "Nhầm lẫn thì ở hai vế", detail: "Viết vế If quá khứ đơn đi với 'will' ở vế chính.", fix: "Nhớ cặp đôi tương thích: 'Present Simple - Will/Can' (Loại 1) và 'Past Simple - Would/Could' (Loại 2)." },
                             { title: "Sai dạng động từ sau would/could", detail: "Viết 'would helped' hoặc 'could to go'.", fix: "Sau would/could luôn luôn là động từ nguyên mẫu không 'to' (V-inf)." }
                         ]
@@ -61510,26 +61501,27 @@ const EXAM_RUNNERS_DB = {
                         title: "Câu ước Wish Loại 2",
                         desc: "Ước muốn trái ngược hoàn toàn với thực tế ở hiện tại.",
                         formula: {
-                            affirmative: "(+) S + wish(es) + S + V2/ed (to be -> were)",
-                            negative: "(-) S + wish(es) + S + didn't + V-inf (to be -> were not)",
-                            interrogative: "Không có thể nghi vấn cho cấu trúc câu ước trực tiếp"
+                            affirmative: "• Với Động từ thường: S + wish(es) + S + V2/ed<br>• Với Động từ TO BE: S + wish(es) + S + were",
+                            negative: "• Với Động từ thường: S + wish(es) + S + didn't + V-inf<br>• Với Động từ TO BE: S + wish(es) + S + were not",
+                            interrogative: "• Với Động từ thường: Không áp dụng thể nghi vấn<br>• Với Động từ TO BE: Không áp dụng thể nghi vấn"
                         },
                         example: "I wish I spoke French fluently.",
                         trap: "Giữ nguyên thì hiện tại hoặc lùi thì quá đà sang quá khứ hoàn thành.",
                         tip: "Ước trái ngược hiện tại -> lùi một thì về Quá khứ đơn.",
                         examples: [
-                            { sentence: "I wish I were taller.", translation: "Tôi ước gì mình cao hơn.", explanation: "Ước trái ngược với hiện tại (tôi đang thấp), động từ 'to be' chia 'were' cho ngôi thứ nhất." },
-                            { sentence: "She wishes she had a computer now.", translation: "Cô ấy ước gì cô ấy có một chiếc máy tính bây giờ.", explanation: "Thực tế hiện tại cô ấy không có máy tính, lùi thì thành 'had'." },
-                            { sentence: "They wish they didn't have to work on Sundays.", translation: "Họ ước gì họ không phải làm việc vào các ngày Chủ nhật.", explanation: "Thực tế họ phải làm việc, lùi thì phủ định thành 'didn't have to'." }
+                            { sentence: "I wish I were taller.", translation: "Tôi ước gì mình cao hơn.", explanation: "Ước trái ngược với hiện tại (tôi đang thấp), động từ 'to be' chia 'were' cho ngôi thứ nhất.", forCase: "Động từ TO BE" },
+                            { sentence: "I wish you were here with me.", translation: "Tôi ước gì bạn có ở đây cùng tôi.", explanation: "Giả định trái ngược hiện tại với động từ to be 'were'.", forCase: "Động từ TO BE" },
+                            { sentence: "She wishes she had a computer now.", translation: "Cô ấy ước gì cô ấy có một chiếc máy tính bây giờ.", explanation: "Thực tế hiện tại cô ấy không có máy tính, lùi thì thành 'had'.", forCase: "Động từ thường" },
+                            { sentence: "They wish they didn't have to work on Sundays.", translation: "Họ ước gì họ không phải làm việc vào các ngày Chủ nhật.", explanation: "Thực tế họ phải làm việc, lùi thì phủ định thành 'didn't have to'.", forCase: "Động từ thường" }
                         ],
                         counterExamples: [
-                            { sentence: "I wish I am rich.", correction: "I wish I were rich.", rule: "Phải lùi thì từ hiện tại đơn (am) về quá khứ giả định (were) trong câu ước trái thực tế hiện tại." },
-                            { sentence: "He wishes he speaks English well.", correction: "He wishes he spoke English well.", rule: "Ước trái hiện tại phải chia động từ ở Quá khứ đơn (spoke)." },
-                            { sentence: "I wish I don't have to study tonight.", correction: "I wish I didn't have to study tonight.", rule: "Lùi trợ động từ phủ định 'don't' thành 'didn't' trong câu ước." }
+                            { sentence: "I wish I am rich.", correction: "I wish I were rich.", rule: "Phải lùi thì từ hiện tại đơn (am) về quá khứ giả định (were) trong câu ước trái thực tế hiện tại.", forCase: "Động từ TO BE" },
+                            { sentence: "He wishes he speaks English well.", correction: "He wishes he spoke English well.", rule: "Ước trái hiện tại phải chia động từ ở Quá khứ đơn (spoke).", forCase: "Động từ thường" },
+                            { sentence: "I wish I don't have to study tonight.", correction: "I wish I didn't have to study tonight.", rule: "Lùi trợ động từ phủ định 'don't' thành 'didn't' trong câu ước.", forCase: "Động từ thường" }
                         ],
                         commonMistakes: [
                             { title: "Không lùi thì trong câu ước WISH", detail: "Giữ nguyên thì hiện tại (ví dụ: I wish I can fly).", fix: "Bắt buộc lùi một thì về quá khứ (I wish I could fly)." },
-                            { title: "Dùng 'was' cho động từ TO BE", detail: "Viết 'She wishes she was a singer'.", fix: "Tương tự điều kiện loại 2, hãy luôn dùng 'WERE' cho tất cả các ngôi." },
+                            { title: "Dùng 'was' cho động từ TO BE", detail: "Viết 'She wishes she was a singer'.", fix: "Tương tự điều kiện loại 2, hãy luôn dùng 'WERE' cho tất cả các ngôi.", forCase: "Động từ TO BE" },
                             { title: "Nhầm lẫn giữa động từ 'wish' và mệnh đề ước", detail: "Quên chia động từ 'wish' theo chủ ngữ chính (ví dụ: He wish... - sai!).", fix: "Động từ 'wish' đứng trước chia bình thường theo chủ ngữ (I wish, he wishes)." }
                         ]
                     }
@@ -61554,54 +61546,64 @@ const EXAM_RUNNERS_DB = {
                         title: "So sánh hơn (Comparative)",
                         desc: "So sánh giữa hai đối tượng với tính từ ngắn (-er) hoặc tính từ dài (more).",
                         formula: {
-                            affirmative: "(+) Short Adj-er + than / More + Long Adj + than",
-                            negative: "(-) Not + Short Adj-er + than / Not + more + Long Adj + than",
-                            interrogative: "(?) Be + S + Short Adj-er + than...?"
+                            affirmative: "• Với Động từ TO BE (dùng Tính từ): S + be + Adj-er + than / more + Adj + than<br>• Với Động từ thường (dùng Trạng từ): S + V + Adv-er + than / more + Adv + than",
+                            negative: "• Với Động từ TO BE (dùng Tính từ): S + be + not + Adj-er + than / more + Adj + than<br>• Với Động từ thường (dùng Trạng từ): S + don't/doesn't/didn't + V + Adv-er + than / more + Adv + than",
+                            interrogative: "• Với Động từ TO BE: Be + S + Adj-er/more + Adj + than...?<br>• Với Động từ thường: Do/Does/Did + S + V + Adv-er/more + Adv + than...?"
                         },
                         example: "He is taller than me. This book is more expensive than that one.",
                         trap: "Dùng nhầm lẫn cả 'more' và '-er' trong một từ (ví dụ: more taller).",
                         tip: "Tìm từ 'than' để nhận biết ngay cấu trúc so sánh hơn!",
                         examples: [
-                            { sentence: "She is taller than her sister.", translation: "Cô ấy cao hơn em gái của mình.", explanation: "'Tall' là tính từ ngắn, thêm đuôi '-er' thành 'taller'." },
-                            { sentence: "This book is more interesting than that one.", translation: "Cuốn sách này thú vị hơn cuốn sách kia.", explanation: "'Interesting' là tính từ dài, dùng cấu trúc 'more + Adj + than'." },
-                            { sentence: "He runs faster than I do.", translation: "Anh ấy chạy nhanh hơn tôi.", explanation: "So sánh hơn với trạng từ ngắn 'fast' thêm đuôi '-er'." }
+                            { sentence: "She is taller than her sister.", translation: "Cô ấy cao hơn em gái của mình.", explanation: "'Tall' là tính từ ngắn, thêm đuôi '-er' thành 'taller'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "This book is more interesting than that one.", translation: "Cuốn sách này thú vị hơn cuốn sách kia.", explanation: "'Interesting' là tính từ dài, dùng cấu trúc 'more + Adj + than'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "He runs faster than I do.", translation: "Anh ấy chạy nhanh hơn tôi.", explanation: "So sánh hơn với trạng từ ngắn 'fast' thêm đuôi '-er'.", forCase: "Động từ thường (dùng Trạng từ)" },
+                            { sentence: "She speaks English more fluently than her classmate.", translation: "Cô ấy nói tiếng Anh trôi chảy hơn bạn học cùng lớp.", explanation: "So sánh hơn với trạng từ dài 'fluently' đi với động từ thường 'speaks' dùng 'more + Adv + than'.", forCase: "Động từ thường (dùng Trạng từ)" }
                         ],
                         counterExamples: [
-                            { sentence: "He is more taller than me.", correction: "He is taller than me.", rule: "Không dùng cả 'more' và đuôi '-er' cùng lúc với tính từ ngắn." },
-                            { sentence: "This car is expensiver than that one.", correction: "This car is more expensive than that one.", rule: "'Expensive' là tính từ dài, không được thêm đuôi '-er' mà phải dùng 'more'." },
-                            { sentence: "She is as smart than her brother.", correction: "She is smarter than her brother.", rule: "Dùng 'than' trong so sánh hơn, còn 'as... as' dùng cho so sánh bằng." }
+                            { sentence: "He is more taller than me.", correction: "He is taller than me.", rule: "Không dùng cả 'more' và đuôi '-er' cùng lúc với tính từ ngắn.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "This car is expensiver than that one.", correction: "This car is more expensive than that one.", rule: "'Expensive' là tính từ dài, không được thêm đuôi '-er' mà phải dùng 'more'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "She is as smart than her brother.", correction: "She is smarter than her brother.", rule: "Dùng 'than' trong so sánh hơn, còn 'as... as' dùng cho so sánh bằng.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "He runs more faster than his brother.", correction: "He runs faster than his brother.", rule: "Không dùng cả 'more' và trạng từ ngắn thêm đuôi '-er' (faster).", forCase: "Động từ thường (dùng Trạng từ)" },
+                            { sentence: "She sings more beautiful than her sister.", correction: "She sings more beautifully than her sister.", rule: "Động từ thường 'sings' yêu cầu trạng từ 'beautifully' để bổ nghĩa trong câu so sánh, không dùng tính từ 'beautiful'.", forCase: "Động từ thường (dùng Trạng từ)" }
                         ],
                         commonMistakes: [
-                            { title: "Dùng 'more' kết hợp đuôi '-er'", detail: "Viết 'more happier' hoặc 'more longer'.", fix: "Tính từ ngắn đã thêm đuôi '-er' tuyệt đối không đi kèm 'more'." },
-                            { title: "Thêm đuôi '-er' cho tính từ dài", detail: "Viết 'beautifuler' hoặc 'intelligentel'.", fix: "Tính từ từ 2 âm tiết trở lên (trừ từ kết thúc bằng y, er, ow, le) phải dùng 'more'." },
-                            { title: "Bỏ quên từ 'than' phía sau", detail: "Viết 'He is taller his brother'.", fix: "Luôn phải có liên từ so sánh 'than' khi có đối tượng so sánh thứ hai." }
+                            { title: "Dùng 'more' kết hợp đuôi '-er'", detail: "Viết 'more happier' hoặc 'more longer'.", fix: "Tính từ ngắn đã thêm đuôi '-er' tuyệt đối không đi kèm 'more'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { title: "Thêm đuôi '-er' cho tính từ dài", detail: "Viết 'beautifuler' hoặc 'intelligentel'.", fix: "Tính từ từ 2 âm tiết trở lên (trừ từ kết thúc bằng y, er, ow, le) phải dùng 'more'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { title: "Bỏ quên từ 'than' phía sau", detail: "Viết 'He is taller his brother'.", fix: "Luôn phải có liên từ so sánh 'than' khi có đối tượng so sánh thứ hai.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { title: "Dùng tính từ thay vì trạng từ sau động từ thường", detail: "Sử dụng tính từ trong cấu trúc so sánh hơn sau động từ chỉ hành động (ví dụ: He drives safer than...).", fix: "Động từ thường đi với trạng từ (ví dụ: He drives more safely than...).", forCase: "Động từ thường (dùng Trạng từ)" },
+                            { title: "Dùng sai đuôi '-er' cho trạng từ dài", detail: "Viết 'carefullyer' hoặc 'fluentlyer'.", fix: "Trạng từ dài kết thúc bằng '-ly' phải dùng 'more + trạng từ + than'. Chỉ có 'early' và 'fast' là trạng từ ngắn được thêm '-er'.", forCase: "Động từ thường (dùng Trạng từ)" }
                         ]
                     },
                     {
                         title: "So sánh bằng (Equative)",
                         desc: "So sánh ngang bằng giữa hai đối tượng, hoặc phủ định (không bằng).",
                         formula: {
-                            affirmative: "(+) as + Adj/Adv + as",
-                            negative: "(-) not + as/so + Adj/Adv + as",
-                            interrogative: "(?) Be + S + as + Adj + as...?"
+                            affirmative: "• Với Động từ TO BE (dùng Tính từ): S + be + as + Adj + as<br>• Với Động từ thường (dùng Trạng từ): S + V + as + Adv + as",
+                            negative: "• Với Động từ TO BE (dùng Tính từ): S + be + not + as/so + Adj + as<br>• Với Động từ thường (dùng Trạng từ): S + don't/doesn't/didn't + V + as/so + Adv + as",
+                            interrogative: "• Với Động từ TO BE: Be + S + as + Adj + as...?<br>• Với Động từ thường: Do/Does/Did + S + V + as + Adv + as...?"
                         },
                         example: "She is as intelligent as her sister. That car is not as fast as this one.",
                         trap: "Thiếu chữ 'as' thứ hai hoặc nhầm lẫn sang cấu trúc so sánh hơn.",
                         tip: "Mẹo ghi nhớ: Cấu trúc đối xứng hai bên luôn là 'as... as'.",
                         examples: [
-                            { sentence: "She is as old as my brother.", translation: "Cô ấy bằng tuổi anh trai tôi.", explanation: "Cấu trúc so sánh bằng đối xứng hai bên: 'as + Adj + as'." },
-                            { sentence: "He doesn't run as quickly as his friend.", translation: "Anh ấy không chạy nhanh bằng bạn mình.", explanation: "So sánh không bằng sử dụng trạng từ: 'not as + Adv + as'." },
-                            { sentence: "This house is not so big as mine.", translation: "Ngôi nhà này không lớn bằng nhà tôi.", explanation: "Trong câu phủ định, từ 'as' thứ nhất có thể thay bằng 'so'." }
+                            { sentence: "She is as old as my brother.", translation: "Cô ấy bằng tuổi anh trai tôi.", explanation: "Cấu trúc so sánh bằng đối xứng hai bên: 'as + Adj + as'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "This house is not so big as mine.", translation: "Ngôi nhà này không lớn bằng nhà tôi.", explanation: "Trong câu phủ định, từ 'as' thứ nhất có thể thay bằng 'so'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "He doesn't run as quickly as his friend.", translation: "Anh ấy không chạy nhanh bằng bạn mình.", explanation: "So sánh không bằng sử dụng trạng từ: 'not as + Adv + as'.", forCase: "Động từ thường (dùng Trạng từ)" },
+                            { sentence: "They studied as hard as they could for the exam.", translation: "Họ đã học hành chăm chỉ hết sức có thể cho kỳ thi.", explanation: "So sánh bằng với trạng từ 'hard' đi với động từ thường 'studied'.", forCase: "Động từ thường (dùng Trạng từ)" }
                         ],
                         counterExamples: [
-                            { sentence: "She is as tall than her mother.", correction: "She is as tall as her mother.", rule: "So sánh bằng bắt buộc phải dùng cặp từ 'as... as', không dùng 'than'." },
-                            { sentence: "This book is not as better as that one.", correction: "This book is not as good as that one.", rule: "Đứng giữa 'as... as' phải là tính từ ở dạng nguyên mẫu, không được dùng dạng so sánh hơn (better)." },
-                            { sentence: "He is as intelligent like his father.", correction: "He is as intelligent as his father.", rule: "Không dùng 'like' để thay thế cho từ 'as' thứ hai trong so sánh bằng." }
+                            { sentence: "She is as tall than her mother.", correction: "She is as tall as her mother.", rule: "So sánh bằng bắt buộc phải dùng cặp từ 'as... as', không dùng 'than'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "This book is not as better as that one.", correction: "This book is not as good as that one.", rule: "Đứng giữa 'as... as' phải là tính từ ở dạng nguyên mẫu, không được dùng dạng so sánh hơn (better).", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "He is as intelligent like his father.", correction: "He is as intelligent as his father.", rule: "Không dùng 'like' để thay thế cho từ 'as' thứ hai trong so sánh bằng.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { sentence: "He doesn't speak English as good as his classmate.", correction: "He doesn't speak English as well as his classmate.", rule: "Sau động từ thường 'speak', phải dùng trạng từ 'well' chứ không dùng tính từ 'good'.", forCase: "Động từ thường (dùng Trạng từ)" },
+                            { sentence: "They didn't work as harder as they should.", correction: "They didn't work as hard as they should.", rule: "Từ đứng giữa 'as... as' phải ở dạng nguyên mẫu, không dùng dạng so sánh hơn 'harder'.", forCase: "Động từ thường (dùng Trạng từ)" }
                         ],
                         commonMistakes: [
-                            { title: "Thiếu chữ 'as' thứ hai", detail: "Viết 'She is as smart her friend'.", fix: "Cấu trúc bắt buộc luôn có hai vế đối xứng 'as... as'." },
-                            { title: "Dùng dạng so sánh hơn ở giữa", detail: "Viết 'as taller as' hoặc 'as more beautiful as'.", fix: "Tính từ đứng giữa hai từ 'as' bắt buộc phải ở dạng nguyên mẫu không chia." },
-                            { title: "Dùng 'like' thay cho 'as'", detail: "Nhầm lẫn viết 'as hot like fire'.", fix: "Đúng chuẩn học thuật phải dùng 'as hot as fire'." }
+                            { title: "Thiếu chữ 'as' thứ hai", detail: "Viết 'She is as smart her friend'.", fix: "Cấu trúc bắt buộc luôn có hai vế đối xứng 'as... as'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { title: "Dùng dạng so sánh hơn ở giữa", detail: "Viết 'as taller as' hoặc 'as more beautiful as'.", fix: "Tính từ đứng giữa hai từ 'as' bắt buộc phải ở dạng nguyên mẫu không chia.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { title: "Dùng 'like' thay cho 'as'", detail: "Nhầm lẫn viết 'as hot like fire'.", fix: "Đúng chuẩn học thuật phải dùng 'as hot as fire'.", forCase: "Động từ TO BE (dùng Tính từ)" },
+                            { title: "Dùng tính từ thay vì trạng từ giữa 'as... as'", detail: "Viết 'He performs as good as...'.", fix: "Giữa 'as... as' bổ nghĩa cho động từ thường bắt buộc phải là trạng từ (ví dụ: as well as).", forCase: "Động từ thường (dùng Trạng từ)" },
+                            { title: "Dùng dạng so sánh hơn của trạng từ", detail: "Viết 'run as faster as' hoặc 'speak as more fluently as'.", fix: "Giữa 'as... as' bắt buộc phải dùng trạng từ nguyên mẫu: as fast as, as fluently as.", forCase: "Động từ thường (dùng Trạng từ)" }
                         ]
                     },
                     {
@@ -61760,27 +61762,29 @@ const EXAM_RUNNERS_DB = {
                         title: "Rút gọn Mệnh đề quan hệ",
                         desc: "Lược bỏ đại từ quan hệ và động từ 'to be', giữ lại V-ing (chủ động) hoặc V3/ed (bị động).",
                         formula: {
-                            affirmative: "(+) Chủ động: N + V-ing | Bị động: N + V3/ed",
-                            negative: "(-) N + not + V-ing / N + not + V3/ed",
-                            interrogative: "Không áp dụng"
+                            affirmative: "• Rút gọn dạng Chủ động (Active): N + V-ing<br>• Rút gọn dạng Bị động (Passive): N + V3/ed",
+                            negative: "• Rút gọn dạng Chủ động (Active): N + not + V-ing<br>• Rút gọn dạng Bị động (Passive): N + not + V3/ed",
+                            interrogative: "• Rút gọn dạng Chủ động (Active): Không áp dụng<br>• Rút gọn dạng Bị động (Passive): Không áp dụng"
                         },
                         example: "The man standing there is my uncle. The toys made in Japan are expensive.",
                         trap: "Chọn nhầm V-ing cho cấu trúc bị động hoặc ngược lại.",
                         tip: "Dịch nghĩa danh từ: nếu 'tự thực hiện' -> V-ing, nếu 'bị/được tác động' -> V3/ed.",
                         examples: [
-                            { sentence: "The man standing near the door is my uncle.", translation: "Người đàn ông đang đứng gần cửa là bác của tôi.", explanation: "Rút gọn mệnh đề chủ động: 'who is standing' ➔ 'standing'." },
-                            { sentence: "The toys made in Japan are highly durable.", translation: "Những món đồ chơi được sản xuất tại Nhật Bản có độ bền rất cao.", explanation: "Rút gọn mệnh đề bị động: 'which were made' ➔ 'made'." },
-                            { sentence: "The students punished by the teacher had to stay.", translation: "Những học sinh bị phạt bởi giáo viên phải ở lại trường.", explanation: "Mang nghĩa bị phạt (bị động) ➔ rút gọn thành quá khứ phân từ 'punished'." }
+                            { sentence: "The man standing near the door is my uncle.", translation: "Người đàn ông đang đứng gần cửa là bác của tôi.", explanation: "Rút gọn mệnh đề chủ động: 'who is standing' ➔ 'standing'.", forCase: "Rút gọn dạng Chủ động (Active)" },
+                            { sentence: "The students sitting at the front row are very attentive.", translation: "Những học sinh đang ngồi ở hàng ghế đầu rất chăm chú.", explanation: "Rút gọn mệnh đề quan hệ chủ động: 'who are sitting' ➔ 'sitting'.", forCase: "Rút gọn dạng Chủ động (Active)" },
+                            { sentence: "The toys made in Japan are highly durable.", translation: "Những món đồ chơi được sản xuất tại Nhật Bản có độ bền rất cao.", explanation: "Rút gọn mệnh đề bị động: 'which were made' ➔ 'made'.", forCase: "Rút gọn dạng Bị động (Passive)" },
+                            { sentence: "The students punished by the teacher had to stay.", translation: "Những học sinh bị phạt bởi giáo viên phải ở lại trường.", explanation: "Mang nghĩa bị phạt (bị động) ➔ rút gọn thành quá khứ phân từ 'punished'.", forCase: "Rút gọn dạng Bị động (Passive)" }
                         ],
                         counterExamples: [
-                            { sentence: "The girl played the piano is my sister.", correction: "The girl playing the piano is my sister.", rule: "Mệnh đề chủ động khi rút gọn phải biến động từ thành dạng V-ing (playing)." },
-                            { sentence: "The bridge building last year is very long.", correction: "The bridge built last year is very long.", rule: "Cây cầu được xây dựng (bị động) nên rút gọn phải dùng dạng V3/ed (built) chứ không dùng V-ing (building)." },
-                            { sentence: "The window was broken yesterday has been fixed.", correction: "The window broken yesterday has been fixed.", rule: "Khi rút gọn mệnh đề quan hệ bị động phải bỏ cả đại từ quan hệ và động từ to be, không giữ lại 'was broken' tạo thành 2 động từ chính trong câu." }
+                            { sentence: "The girl played the piano is my sister.", correction: "The girl playing the piano is my sister.", rule: "Mệnh đề chủ động khi rút gọn phải biến động từ thành dạng V-ing (playing).", forCase: "Rút gọn dạng Chủ động (Active)" },
+                            { sentence: "The bridge building last year is very long.", correction: "The bridge built last year is very long.", rule: "Cây cầu được xây dựng (bị động) nên rút gọn phải dùng dạng V3/ed (built) chứ không dùng V-ing (building).", forCase: "Rút gọn dạng Bị động (Passive)" },
+                            { sentence: "The window was broken yesterday has been fixed.", correction: "The window broken yesterday has been fixed.", rule: "Khi rút gọn mệnh đề quan hệ bị động phải bỏ cả đại từ quan hệ và động từ to be, không giữ lại 'was broken' tạo thành 2 động từ chính trong câu.", forCase: "Rút gọn dạng Bị động (Passive)" }
                         ],
                         commonMistakes: [
-                            { title: "Dùng sai V-ing cho câu bị động", detail: "Viết 'The house building in 2020...' (ngôi nhà không thể tự xây).", fix: "Xác định rõ bản chất: nếu vật bị tác động, bắt buộc dùng V3/ed (The house built...)." },
-                            { title: "Giữ lại động từ 'be' chia thì", detail: "Viết 'The student was punished by the teacher yesterday...'.", fix: "Nếu không dùng đại từ quan hệ, phải bỏ hoàn toàn 'to be' (The student punished...)." },
-                            { title: "Dùng V2 thay vì quá khứ phân từ V3", detail: "Nhầm lẫn các động từ bất quy tắc khi viết rút gọn bị động (ví dụ: write -> wrote thay vì written).", fix: "Luôn sử dụng động từ ở cột 3 trong bảng bất quy tắc cho dạng rút gọn bị động." }
+                            { title: "Dùng dạng V-bare hoặc V2 cho chủ động", detail: "Viết 'The boy stand there' hoặc 'The boy stood there is my friend'.", fix: "Rút gọn chủ động bắt buộc dùng V-ing (standing).", forCase: "Rút gọn dạng Chủ động (Active)" },
+                            { title: "Dùng sai V-ing cho câu bị động", detail: "Viết 'The house building in 2020...' (ngôi nhà không thể tự xây).", fix: "Xác định rõ bản chất: nếu vật bị tác động, bắt buộc dùng V3/ed (The house built...).", forCase: "Rút gọn dạng Bị động (Passive)" },
+                            { title: "Giữ lại động từ 'be' chia thì", detail: "Viết 'The student was punished by the teacher yesterday...'.", fix: "Nếu không dùng đại từ quan hệ, phải bỏ hoàn toàn 'to be' (The student punished...).", forCase: "Rút gọn dạng Bị động (Passive)" },
+                            { title: "Dùng V2 thay vì quá khứ phân từ V3", detail: "Nhầm lẫn các động từ bất quy tắc khi viết rút gọn bị động (ví dụ: write -> wrote thay vì written).", fix: "Luôn sử dụng động từ ở cột 3 trong bảng bất quy tắc cho dạng rút gọn bị động.", forCase: "Rút gọn dạng Bị động (Passive)" }
                         ]
                     }
                 ]
@@ -62027,26 +62031,26 @@ const EXAM_RUNNERS_DB = {
                         title: "Câu hỏi gián tiếp (Reported Questions)",
                         desc: "Tường thuật lại câu hỏi Yes/No hoặc câu hỏi có từ để hỏi Wh-.",
                         formula: {
-                            affirmative: "(+) asked + (if/whether) + S + V (lùi thì) | asked + Wh-word + S + V (lùi thì)",
-                            negative: "(-) asked + if + S + trợ động từ phủ định (lùi thì) + V",
-                            interrogative: "Không áp dụng"
+                            affirmative: "• Câu hỏi Yes/No: asked + (if/whether) + S + V (lùi thì)<br>• Câu hỏi có từ để hỏi (Wh-questions): asked + Wh-word + S + V (lùi thì)",
+                            negative: "• Câu hỏi Yes/No: asked + if/whether + S + trợ động từ phủ định (lùi thì) + V<br>• Câu hỏi có từ để hỏi (Wh-questions): asked + Wh-word + S + trợ động từ phủ định (lùi thì) + V",
+                            interrogative: "• Câu hỏi Yes/No: Không áp dụng<br>• Câu hỏi có từ để hỏi (Wh-questions): Không áp dụng"
                         },
                         example: "'Where do you live?' she asked. ➔ She asked me where I lived.",
                         trap: "Quen tay dùng cấu trúc đảo ngữ có trợ động từ (ví dụ: she asked me where did I live - sai!).",
                         tip: "Quy tắc cốt lõi: Không đảo ngữ trong câu gián tiếp, phải đưa về trật tự khẳng định S + V.",
                         examples: [
-                            { sentence: "She asked me where I lived.", translation: "Cô ấy đã hỏi tôi nơi tôi sống.", explanation: "Câu hỏi Wh-: 'Where do you live?' chuyển thành gián tiếp bỏ trợ động từ 'do', giữ nguyên trật tự khẳng định 'I lived' và lùi thì." },
-                            { sentence: "He asked if I liked English.", translation: "Anh ấy đã hỏi tôi liệu tôi có thích tiếng Anh không.", explanation: "Câu hỏi Yes/No: 'Do you like English?' chuyển thành gián tiếp thêm từ nối 'if' và lùi thì." },
-                            { sentence: "I asked her whether she was tired.", translation: "Tôi đã hỏi cô ấy liệu cô ấy có mệt không.", explanation: "Sử dụng từ nối 'whether' trong câu tường thuật câu hỏi Yes/No." }
+                            { sentence: "He asked if I liked English.", translation: "Anh ấy đã hỏi tôi liệu tôi có thích tiếng Anh không.", explanation: "Câu hỏi Yes/No: 'Do you like English?' chuyển thành gián tiếp thêm từ nối 'if' và lùi thì.", forCase: "Câu hỏi Yes/No" },
+                            { sentence: "I asked her whether she was tired.", translation: "Tôi đã hỏi cô ấy liệu cô ấy có mệt không.", explanation: "Sử dụng từ nối 'whether' trong câu tường thuật câu hỏi Yes/No.", forCase: "Câu hỏi Yes/No" },
+                            { sentence: "She asked me where I lived.", translation: "Cô ấy đã hỏi tôi nơi tôi sống.", explanation: "Câu hỏi Wh-: 'Where do you live?' chuyển thành gián tiếp bỏ trợ động từ 'do', giữ nguyên trật tự khẳng định 'I lived' và lùi thì.", forCase: "Câu hỏi có từ để hỏi (Wh-questions)" }
                         ],
                         counterExamples: [
-                            { sentence: "She asked me where did I live.", correction: "She asked me where I lived.", rule: "Trong câu hỏi gián tiếp, tuyệt đối không dùng trợ động từ đảo ngữ 'did'. Phải viết theo trật tự câu khẳng định 'I lived'." },
-                            { sentence: "He asked me if I am tired.", correction: "He asked me if I was tired.", rule: "Phải lùi động từ 'am' về quá khứ 'was' trong mệnh đề câu hỏi gián tiếp." },
-                            { sentence: "They asked what did she want.", correction: "They asked what she wanted.", rule: "Bỏ trợ động từ đảo ngữ 'did' và lùi động từ 'want' thành 'wanted'." }
+                            { sentence: "He asked me if I am tired.", correction: "He asked me if I was tired.", rule: "Phải lùi động từ 'am' về quá khứ 'was' trong mệnh đề câu hỏi gián tiếp.", forCase: "Câu hỏi Yes/No" },
+                            { sentence: "She asked me where did I live.", correction: "She asked me where I lived.", rule: "Trong câu hỏi gián tiếp, tuyệt đối không dùng trợ động từ đảo ngữ 'did'. Phải viết theo trật tự câu khẳng định 'I lived'.", forCase: "Câu hỏi có từ để hỏi (Wh-questions)" },
+                            { sentence: "They asked what did she want.", correction: "They asked what she wanted.", rule: "Bỏ trợ động từ đảo ngữ 'did' và lùi động từ 'want' thành 'wanted'.", forCase: "Câu hỏi có từ để hỏi (Wh-questions)" }
                         ],
                         commonMistakes: [
                             { title: "Giữ cấu trúc đảo ngữ câu hỏi", detail: "Lỗi cực kỳ phổ biến: viết 'He asked me where was the station'.", fix: "Đưa động từ ra sau chủ ngữ theo trật tự câu trần thuật: 'He asked me where the station was'." },
-                            { title: "Quên từ nối 'if' hoặc 'whether'", detail: "Chuyển câu hỏi Yes/No mà không có từ nối (ví dụ: She asked me I liked coffee).", fix: "Bắt buộc thêm 'if' hoặc 'whether' đứng đầu mệnh đề gián tiếp của câu hỏi Yes/No." },
+                            { title: "Quên từ nối 'if' hoặc 'whether'", detail: "Chuyển câu hỏi Yes/No mà không có từ nối (ví dụ: She asked me I liked coffee).", fix: "Bắt buộc thêm 'if' hoặc 'whether' đứng đầu mệnh đề gián tiếp của câu hỏi Yes/No.", forCase: "Câu hỏi Yes/No" },
                             { title: "Lùi thì sai sau từ nối", detail: "Nhầm lẫn lùi thì không tương thích với ngữ cảnh quá khứ.", fix: "Tuân thủ nghiêm ngặt quy tắc lùi thì cho mọi động từ trong mệnh đề gián tiếp." }
                         ]
                     },
@@ -62098,7 +62102,7 @@ const EXAM_RUNNERS_DB = {
                         title: "Vị trí Từ loại (Word Position)",
                         desc: "Xác định vai trò ngữ pháp để điền Danh, Tính, Động hay Trạng từ vào chỗ trống.",
                         formula: {
-                            affirmative: "(+) Adj + N | linking verb + Adj | V + Adv",
+                            affirmative: "• Với Động từ To Be / Liên kết: S + be/linking verb + Adj<br>• Với Động từ thường: S + V + Adv<br>• Với Danh từ: Adj + N",
                             negative: "(-) Không áp dụng dạng phủ định riêng biệt",
                             interrogative: "Không áp dụng"
                         },
@@ -62106,19 +62110,19 @@ const EXAM_RUNNERS_DB = {
                         trap: "Bẫy điền tính từ sau động từ thường hoặc trạng từ sau động từ liên kết (linking verbs).",
                         tip: "Mẹo: Động từ thường đi với Trạng từ (run quickly), Động từ chỉ trạng thái đi với Tính từ (feel tired).",
                         examples: [
-                            { sentence: "She is a beautiful girl.", translation: "Cô ấy là một cô gái xinh đẹp.", explanation: "Tính từ 'beautiful' đứng trước bổ nghĩa cho danh từ 'girl'." },
-                            { sentence: "The student performed very well in the test.", translation: "Học sinh đó đã thể hiện rất tốt trong bài thi.", explanation: "Trạng từ 'well' đứng sau bổ nghĩa cho động từ thường 'performed'." },
-                            { sentence: "This food smells delicious.", translation: "Món ăn này có mùi rất thơm ngon.", explanation: "Sau động từ liên kết giác quan 'smell' ta sử dụng tính từ 'delicious'." }
+                            { sentence: "This food smells delicious.", translation: "Món ăn này có mùi rất thơm ngon.", explanation: "Sau động từ liên kết giác quan 'smell' ta sử dụng tính từ 'delicious'.", forCase: "Động từ To Be / Liên kết" },
+                            { sentence: "The student performed very well in the test.", translation: "Học sinh đó đã thể hiện rất tốt trong bài thi.", explanation: "Trạng từ 'well' đứng sau bổ nghĩa cho động từ thường 'performed'.", forCase: "Động từ thường" },
+                            { sentence: "She is a beautiful girl.", translation: "Cô ấy là một cô gái xinh đẹp.", explanation: "Tính từ 'beautiful' đứng trước bổ nghĩa cho danh từ 'girl'.", forCase: "Danh từ" }
                         ],
                         counterExamples: [
-                            { sentence: "He drives very careful.", correction: "He drives very carefully.", rule: "Động từ thường 'drive' yêu cầu bổ nghĩa bằng một Trạng từ (carefully) chứ không dùng tính từ (careful)." },
-                            { sentence: "She feels badly today.", correction: "She feels bad today.", rule: "'Feel' là động từ liên kết (linking verb), theo sau nó phải là một Tính từ (bad) chứ không phải trạng từ (badly)." },
-                            { sentence: "He is a driver carefully.", correction: "He is a careful driver.", rule: "Tính từ (careful) bổ nghĩa cho danh từ (driver) đứng sau và đứng trước danh từ." }
+                            { sentence: "She feels badly today.", correction: "She feels bad today.", rule: "'Feel' là động từ liên kết (linking verb), theo sau nó phải là một Tính từ (bad) chứ không phải trạng từ (badly).", forCase: "Động từ To Be / Liên kết" },
+                            { sentence: "He drives very careful.", correction: "He drives very carefully.", rule: "Động từ thường 'drive' yêu cầu bổ nghĩa bằng một Trạng từ (carefully) chứ không dùng tính từ (careful).", forCase: "Động từ thường" },
+                            { sentence: "He is a driver carefully.", correction: "He is a careful driver.", rule: "Tính từ (careful) bổ nghĩa cho danh từ (driver) đứng sau và đứng trước danh từ.", forCase: "Danh từ" }
                         ],
                         commonMistakes: [
-                            { title: "Dùng tính từ thay vì trạng từ sau động từ thường", detail: "Viết 'She speaks English fluent'.", fix: "Các động từ chỉ hành động thường đi kèm trạng từ thêm đuôi '-ly' (fluently)." },
-                            { title: "Dùng trạng từ sau động từ liên kết (linking verbs)", detail: "Viết 'The soup tastes deliciously' hoặc 'She looks happily'.", fix: "Sau linking verbs (look, taste, smell, feel, seem, become...) bắt buộc phải dùng Tính từ." },
-                            { title: "Đặt sai vị trí của Tính từ và Danh từ", detail: "Viết 'I bought a book interesting' do ảnh hưởng ngữ pháp tiếng Việt.", fix: "Trong tiếng Anh, tính từ luôn đứng TRƯỚC danh từ nó bổ nghĩa." }
+                            { title: "Dùng trạng từ sau động từ liên kết (linking verbs)", detail: "Viết 'The soup tastes deliciously' hoặc 'She looks happily'.", fix: "Sau linking verbs (look, taste, smell, feel, seem, become...) bắt buộc phải dùng Tính từ.", forCase: "Động từ To Be / Liên kết" },
+                            { title: "Dùng tính từ thay vì trạng từ sau động từ thường", detail: "Viết 'She speaks English fluent'.", fix: "Các động từ chỉ hành động thường đi kèm trạng từ thêm đuôi '-ly' (fluently).", forCase: "Động từ thường" },
+                            { title: "Đặt sai vị trí của Tính từ và Danh từ", detail: "Viết 'I bought a book interesting' do ảnh hưởng ngữ pháp tiếng Việt.", fix: "Trong tiếng Anh, tính từ luôn đứng TRƯỚC danh từ nó bổ nghĩa.", forCase: "Danh từ" }
                         ]
                     },
                     {
@@ -62223,22 +62227,24 @@ const EXAM_RUNNERS_DB = {
                         title: "Câu hỏi đuôi đối xứng (Question Tags)",
                         desc: "Phần đuôi ngắn hỏi lại xác nhận, tuân theo quy tắc đối xứng khẳng định - phủ định.",
                         formula: {
-                            affirmative: "(+) S + V (khẳng định) ➔ trợ động từ phủ định + đại từ?",
-                            negative: "(-) S + V (phủ định) ➔ trợ động từ khẳng định + đại từ?",
+                            affirmative: "• Với Động từ thường: S + V (khẳng định) ➔ don't/doesn't/didn't + S?<br>• Với Động từ TO BE: S + be (khẳng định) ➔ be + not + S?",
+                            negative: "• Với Động từ thường: S + trợ động từ phủ định + V ➔ do/does/did + S?<br>• Với Động từ TO BE: S + be + not ➔ be + S?",
                             interrogative: "Bản chất câu hỏi đuôi chính là câu nghi vấn kết hợp"
                         },
                         example: "She is studying hard, isn't she? They didn't go out, did they?",
                         trap: "Dùng sai trợ động từ ở phần đuôi hoặc quên đổi chủ ngữ thành đại từ nhân xưng thích hợp.",
                         tip: "Xác định rõ động từ chính ở thì nào -> mượn đúng trợ động từ của thì đó ở thể đối lập!",
                         examples: [
-                            { sentence: "She is a beautiful girl, isn't she?", translation: "Cô ấy là một cô gái xinh đẹp, phải không?", explanation: "Mệnh đề chính khẳng định với 'is', phần đuôi dùng phủ định 'isn't she'." },
-                            { sentence: "They went to the cinema, didn't they?", translation: "Họ đã đi xem phim, phải không?", explanation: "Động từ chính ở quá khứ đơn 'went' (khẳng định), mượn trợ động từ quá khứ phủ định 'didn't they'." },
-                            { sentence: "Your brother doesn't like milk, does he?", translation: "Em trai bạn không thích sữa, phải không?", explanation: "Mệnh đề chính phủ định 'doesn't', phần đuôi dùng khẳng định 'does he'." }
+                            { sentence: "They went to the cinema, didn't they?", translation: "Họ đã đi xem phim, phải không?", explanation: "Động từ chính ở quá khứ đơn 'went' (khẳng định), mượn trợ động từ quá khứ phủ định 'didn't they'.", forCase: "Động từ thường" },
+                            { sentence: "Your brother doesn't like milk, does he?", translation: "Em trai bạn không thích sữa, phải không?", explanation: "Mệnh đề chính phủ định 'doesn't', phần đuôi dùng khẳng định 'does he'.", forCase: "Động từ thường" },
+                            { sentence: "She is a beautiful girl, isn't she?", translation: "Cô ấy là một cô gái xinh đẹp, phải không?", explanation: "Mệnh đề chính khẳng định với 'is', phần đuôi dùng phủ định 'isn't she'.", forCase: "Động từ TO BE" },
+                            { sentence: "They were not at home, were they?", translation: "Họ không có ở nhà, đúng không?", explanation: "Mệnh đề chính phủ định với 'were not', phần đuôi dùng khẳng định 'were they'.", forCase: "Động từ TO BE" }
                         ],
                         counterExamples: [
-                            { sentence: "They are playing soccer, don't they?", correction: "They are playing soccer, aren't they?", rule: "Mệnh đề chính dùng động từ liên kết 'are' ➔ Phần đuôi phải dùng 'aren't' chứ không mượn trợ động từ 'don't'." },
-                            { sentence: "Nam went to school yesterday, didn't Nam?", correction: "Nam went to school yesterday, didn't he?", rule: "Phần câu hỏi đuôi bắt buộc phải dùng Đại từ nhân xưng (he) thay thế cho danh từ riêng (Nam)." },
-                            { sentence: "She has not done the homework, didn't she?", correction: "She has not done the homework, has she?", rule: "Mệnh đề chính dùng thì Hiện tại hoàn thành phủ định 'has not' ➔ Phần đuôi phải dùng trợ động từ khẳng định 'has she'." }
+                            { sentence: "Nam went to school yesterday, didn't Nam?", correction: "Nam went to school yesterday, didn't he?", rule: "Phần câu hỏi đuôi bắt buộc phải dùng Đại từ nhân xưng (he) thay thế cho danh từ riêng (Nam).", forCase: "Động từ thường" },
+                            { sentence: "She has not done the homework, didn't she?", correction: "She has not done the homework, has she?", rule: "Mệnh đề chính dùng thì Hiện tại hoàn thành phủ định 'has not' ➔ Phần đuôi phải dùng trợ động từ khẳng định 'has she'.", forCase: "Động từ thường" },
+                            { sentence: "They are playing soccer, don't they?", correction: "They are playing soccer, aren't they?", rule: "Mệnh đề chính dùng động từ liên kết 'are' ➔ Phần đuôi phải dùng 'aren't' chứ không mượn trợ động từ 'don't'.", forCase: "Động từ TO BE" },
+                            { sentence: "She is your sister, does she?", correction: "She is your sister, isn't she?", rule: "Mệnh đề chính dùng to be 'is', phần đuôi phải dùng 'isn't' chứ không mượn trợ động từ 'does'.", forCase: "Động từ TO BE" }
                         ],
                         commonMistakes: [
                             { title: "Dùng sai trợ động từ", detail: "Mượn trợ động từ 'don't/didn't' trong khi mệnh đề chính có động từ TO BE hoặc động từ khiếm khuyết.", fix: "Nếu câu có 'be' hoặc modal verb (will, can, should), dùng chính nó ở phần đuôi. Nếu có động từ thường, mượn do/does/did." },

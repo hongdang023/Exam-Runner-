@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Runners - Psychological Learning & Exam Portal</title>
     <meta name="description" content="Chinh phục kỳ thi Tiếng Anh vào lớp 10 với phương pháp học tập tương tác, bản đồ kỹ năng cá nhân hóa và giải thích chi tiết 5 bước.">
-    <!-- Google Fonts: Plus Jakarta Sans (Header) & DM Sans (Body) -->
+    <!-- Google Fonts: Plus Jakarta Sans (Header) & Be Vietnam Pro (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100..900;1,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
     <!-- Phosphor Icons for premium human-crafted feel -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="css/styles.css">
@@ -69,11 +69,11 @@
             
             <!-- User Quick Profile Footer -->
             <div class="sidebar-footer">
-                <div class="user-avatar-area">
-                    <div class="avatar-circle">?</div>
+                <div class="user-avatar-area" id="sidebar-profile-btn" style="cursor: pointer; transition: background 0.2s; border-radius: var(--radius-md); padding: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                    <div class="avatar-circle" id="sidebar-avatar-initial">?</div>
                     <div class="user-meta">
-                        <span class="user-name">Học viên mới</span>
-                        <span class="user-role-badge">Level 1 Novice</span>
+                        <span class="user-name" id="sidebar-user-name">Học viên mới</span>
+                        <span class="user-role-badge">Chỉnh sửa hồ sơ</span>
                     </div>
                 </div>
             </div>
@@ -148,17 +148,32 @@
                     <span class="step-dot" id="ob-dot-2">2</span>
                     <span class="step-dot" id="ob-dot-3">3</span>
                     <span class="step-dot" id="ob-dot-4">4</span>
+                    <span class="step-dot" id="ob-dot-5">5</span>
                 </div>
                 
-                <!-- Step 1: Date Picker -->
+                <!-- Step 1: User Profile -->
                 <div class="onboarding-step-view active" id="onboarding-step-1">
+                    <h4 style="margin-bottom: 10px;">👋 Thông Tin Cá Nhân</h4>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Để hệ thống cá nhân hóa trải nghiệm học tập và báo cáo.</p>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <input type="text" id="ob-student-name" class="onboarding-input form-input" placeholder="Tên của con (Học sinh) *" style="width:100%; padding:12px; box-sizing: border-box; background:rgba(255,255,255,0.03);">
+                        <input type="text" id="ob-parent-name" class="onboarding-input form-input" placeholder="Tên của Phụ huynh *" style="width:100%; padding:12px; box-sizing: border-box; background:rgba(255,255,255,0.03);">
+                        <div style="display: flex; gap: 12px;">
+                            <input type="text" id="ob-school" class="onboarding-input form-input" placeholder="Trường học (Tùy chọn)" style="width:100%; padding:12px; flex:2; box-sizing: border-box; background:rgba(255,255,255,0.03);">
+                            <input type="text" id="ob-class" class="onboarding-input form-input" placeholder="Lớp" style="width:100%; padding:12px; flex:1; box-sizing: border-box; background:rgba(255,255,255,0.03);">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Date Picker -->
+                <div class="onboarding-step-view" id="onboarding-step-2">
                     <h4 style="margin-bottom: 10px;">📅 Chọn Ngày Thi</h4>
                     <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Chúng tôi sẽ tính toán số ngày còn lại để rải đều 50 đề thi hợp lý nhất.</p>
                     <input type="date" id="ob-exam-date" class="onboarding-input" style="width:100%; padding:14px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); font-weight:600; text-align:center;">
                 </div>
                 
-                <!-- Step 2: Goal target score -->
-                <div class="onboarding-step-view" id="onboarding-step-2">
+                <!-- Step 3: Goal target score -->
+                <div class="onboarding-step-view" id="onboarding-step-3">
                     <h4 style="margin-bottom: 10px;">🎯 Mục Tiêu Điểm</h4>
                     <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Cam kết điểm số để nhận động lực học tập thích ứng phù hợp.</p>
                     <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
@@ -169,8 +184,8 @@
                     </div>
                 </div>
                 
-                <!-- Step 3: Studying commitment -->
-                <div class="onboarding-step-view" id="onboarding-step-3">
+                <!-- Step 4: Studying commitment -->
+                <div class="onboarding-step-view" id="onboarding-step-4">
                     <h4 style="margin-bottom: 10px;">⚡ Lịch Học Tuần</h4>
                     <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Xác định quỹ thời gian rảnh để lên kế hoạch phân bổ lịch học chi tiết.</p>
                     <div style="display:flex; flex-direction:column; gap:12px;">
@@ -198,18 +213,18 @@
                     </div>
                 </div>
 
-                <!-- Step 4: PIN Security Settings -->
-                <div class="onboarding-step-view" id="onboarding-step-4">
+                <!-- Step 5: PIN Security Settings -->
+                <div class="onboarding-step-view" id="onboarding-step-5">
                     <h4 style="margin-bottom: 10px;">🔑 Tạo Mã PIN</h4>
                     <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Mã PIN giúp bảo vệ Dashboard Phụ huynh và Gia sư khỏi việc học sinh tự ý truy cập hoặc sửa đổi cấu hình lộ trình.</p>
                     <div style="display: flex; flex-direction: column; gap: 16px;">
                         <div>
                             <label class="form-label" style="display: block; margin-bottom: 6px; font-weight:600; text-align: left;">Mã PIN Phụ huynh (4 chữ số)</label>
-                            <input type="password" pattern="[0-9]*" inputmode="numeric" maxlength="4" id="ob-parent-pin" class="onboarding-input" placeholder="Ví dụ: 1234" style="width:100%; padding:12px; background:rgba(0, 0, 0, 0.25); border:1px solid var(--border-color); border-radius:var(--radius-md); text-align:center; font-size:16px; font-weight:bold; letter-spacing:8px; color:var(--text-primary);">
+                            <input type="password" pattern="[0-9]*" inputmode="numeric" maxlength="4" id="ob-parent-pin" class="onboarding-input" placeholder="Ví dụ: 1234" style="width:100%; padding:12px; background:rgba(0, 0, 0, 0.25); border:1px solid var(--border-color); border-radius:var(--radius-md); text-align:center; font-size:16px; font-weight:bold; letter-spacing:8px; color:var(--text-primary); box-sizing: border-box;">
                         </div>
                         <div>
                             <label class="form-label" style="display: block; margin-bottom: 6px; font-weight:600; text-align: left;">Mã PIN Gia sư / Quản trị (4 chữ số)</label>
-                            <input type="password" pattern="[0-9]*" inputmode="numeric" maxlength="4" id="ob-tutor-pin" class="onboarding-input" placeholder="Ví dụ: 5678" style="width:100%; padding:12px; background:rgba(0, 0, 0, 0.25); border:1px solid var(--border-color); border-radius:var(--radius-md); text-align:center; font-size:16px; font-weight:bold; letter-spacing:8px; color:var(--text-primary);">
+                            <input type="password" pattern="[0-9]*" inputmode="numeric" maxlength="4" id="ob-tutor-pin" class="onboarding-input" placeholder="Ví dụ: 5678" style="width:100%; padding:12px; background:rgba(0, 0, 0, 0.25); border:1px solid var(--border-color); border-radius:var(--radius-md); text-align:center; font-size:16px; font-weight:bold; letter-spacing:8px; color:var(--text-primary); box-sizing: border-box;">
                         </div>
                     </div>
                 </div>
@@ -379,7 +394,65 @@
             }
         };
     </script>
+    <!-- Profile Edit Modal -->
+    <div class="modal-overlay" id="profile-edit-modal">
+        <div class="glass-modal onboarding-card animate-zoom" style="max-width: 550px;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; flex-direction: column;">
+                    <h3 style="margin: 0;">Cài Đặt Hồ Sơ</h3>
+                    <span style="font-size: 12px; color: var(--text-tertiary);">Cập nhật thông tin cá nhân và mục tiêu học tập</span>
+                </div>
+                <button class="btn btn-secondary" onclick="document.getElementById('profile-edit-modal').classList.remove('open')" style="padding: 6px 12px;">Đóng</button>
+            </div>
+            <div class="modal-body" style="padding-top: 16px;">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <label class="form-label" style="display: block; margin-bottom: 6px; font-weight:600;">Thông tin gia đình</label>
+                        <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+                            <input type="text" id="prof-student-name" class="onboarding-input form-input" placeholder="Tên của con (Học sinh) *" style="width:100%; padding:10px; background:rgba(255,255,255,0.03);">
+                            <input type="text" id="prof-parent-name" class="onboarding-input form-input" placeholder="Tên của Phụ huynh *" style="width:100%; padding:10px; background:rgba(255,255,255,0.03);">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label" style="display: block; margin-bottom: 6px; font-weight:600;">Trường / Lớp</label>
+                        <div style="display: flex; gap: 12px;">
+                            <input type="text" id="prof-school" class="onboarding-input form-input" placeholder="Trường học" style="width:100%; padding:10px; flex:2; background:rgba(255,255,255,0.03);">
+                            <input type="text" id="prof-class" class="onboarding-input form-input" placeholder="Lớp" style="width:100%; padding:10px; flex:1; background:rgba(255,255,255,0.03);">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label" style="display: block; margin-bottom: 6px; font-weight:600;">Ngày diễn ra kỳ thi</label>
+                        <input type="date" id="prof-exam-date" class="onboarding-input" style="width:100%; padding:10px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); font-weight:600; text-align:center;">
+                    </div>
+                    <div style="display: flex; gap: 16px;">
+                        <div style="flex: 1;">
+                            <label class="form-label" style="display: block; margin-bottom: 6px; font-weight:600;">Mục tiêu điểm</label>
+                            <select id="prof-score-goal" class="onboarding-input" style="width:100%; padding:10px; background:rgba(0,0,0,0.25); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-primary);">
+                                <option value="7.0">7.0 (Khá)</option>
+                                <option value="8.0">8.0 (Giỏi)</option>
+                                <option value="9.0">9.0 (Xuất sắc)</option>
+                                <option value="10">10.0 (Thủ khoa)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label class="form-label" style="display: block; margin-bottom: 6px; font-weight:600;">Thời gian học / tuần</label>
+                            <select id="prof-commitment" class="onboarding-input" style="width:100%; padding:10px; background:rgba(0,0,0,0.25); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-primary);">
+                                <option value="3">3 giờ (Thảnh thơi)</option>
+                                <option value="6">6 giờ (Tiêu chuẩn)</option>
+                                <option value="12">12 giờ (Chiến binh)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top:16px; display:flex; justify-content:flex-end;">
+                <button class="btn btn-primary" id="prof-save-btn">Lưu Thay Đổi</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/exams_db.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/practice_bank.js"></script>
+    <script src="js/app.js?v=2"></script>
 </body>
 </html>

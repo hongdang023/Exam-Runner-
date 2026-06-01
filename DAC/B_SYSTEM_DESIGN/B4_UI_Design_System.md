@@ -168,6 +168,55 @@ Khoảng trắng (White-space) là linh hồn của "Less is More". Hệ thống
 - **Sidebar Navigation (Hover/Active states):** Khi lướt qua (Hover) một mục trên Sidebar tối, nền của mục đó chuyển sang `rgba(255,255,255,0.06)`. Khi đang chọn (Active), text chuyển sang màu Trắng tinh (`#FFFFFF`) và có một vệt màu `Primary-Accent` (Cam) mỏng ở cạnh trái.
 - **Cognitive Load Reduction:** Dashboard chỉ hiển thị con số khổng lồ (ví dụ: **85%**). Các dòng chữ chú thích bên dưới bắt buộc phải nhỏ và có màu `Text-Secondary` (`#8E8E93`). Cắt giảm tối đa chữ thừa.
 
+### 4.10. Tiêu chuẩn Page Header (Nav-Items)
+
+Page Header (Tiêu đề trang) tại các Nav-Items (trừ Dashboard) phải tuân thủ nghiêm ngặt các quy tắc sau để đảm bảo không gian thở và sự đồng bộ, khắc phục lỗi thiết kế bị dính sát mép trên:
+
+- **Thành phần & Bố cục:**
+  - **Trái (Left Area):** Gồm Page Title (Tiêu đề) và Subtitle (Mô tả phụ giới hạn 15-20 chữ). Khoảng cách (margin-bottom) giữa Title và Subtitle là `8px`.
+  - **Phải (Right Area - Flexible Slot):** Mặc định chứa **Streak Widget** (Lửa 🔥) để đồng bộ Gamification (nền `#F2F2F7`, bo góc `8px-12px`, padding `8px 12px`). Có thể thay thế bằng nút Call-to-Action ở các trang không có tính luyện tập (VD: Bản đồ năng lực).
+  - **Đường phân cách (Divider):** Bắt buộc có viền dưới `border-bottom: 1px solid #E5E5EA` ngăn cách rõ ràng với vùng nội dung bên dưới.
+- **Quy tắc Padding (Container Padding):**
+  - **Top & Bottom:** Tối thiểu `24px` (hoặc `32px` phía trên tùy khoảng cách với topbar) để triệt tiêu sự ngột ngạt.
+  - **Left & Right:** Đồng bộ với lề của toàn trang (VD: `24px` hoặc `32px`).
+- **Typography:**
+  - **Page Title:** Thẻ `<h1>`, kích thước `24px` (Desktop) / `20px` (Mobile), `font-weight: ExtraBold`, màu `Text-Primary` (`#13110F`). `line-height: 1.2`.
+  - **Subtitle:** Thẻ `<p>`, kích thước `14px`, màu `Text-Secondary` (`#8E8E93`), `font-weight: Regular`. `line-height: 1.5`.
+- **Căn chỉnh (Alignment):** Sử dụng Flexbox `justify-content: space-between`. Trục dọc `align-items: center` (nếu Widget bên phải thấp) hoặc `align-items: flex-start` dóng bằng đỉnh Title (nếu Widget cao).
+
+### 4.11. Tiêu chuẩn Tabs & Section Title
+
+Để tối ưu không gian hiển thị và tuân thủ nguyên tắc "Less is More":
+- **Tabs (Điều hướng phân khu):** Áp dụng 100% kiểu **Segmented Control** (Pill-style).
+  - Khung bao ngoài: Nền trong suốt hoặc xám mờ (`rgba(0, 0, 0, 0.04)`), bo góc tròn (`30px`), padding nhỏ (`4px`) ôm sát các tab.
+  - Tab Inactive (Chưa chọn): Không màu nền, chữ xám (`Text-Secondary`), không gạch chân.
+  - Tab Active (Đã chọn): Nền trắng tinh (`#FFFFFF`), có đổ bóng tĩnh (box-shadow nhẹ), chữ màu Cam Hổ Phách (`Primary-Accent`) hoặc Đậm (`Text-Primary`), bo góc tròn trịa.
+  - Tuyệt đối cấm sử dụng kiểu Line Tabs (gạch chân dưới đáy) để tránh nhầm lẫn với đường kẻ phân cách.
+- **Section Title (Tiêu đề phân khu):**
+  - Mặc định **LOẠI BỎ hoàn toàn** các Section Title lớn (thường được căn giữa) nằm phía trên các Tabs hoặc các thành phần chính để tránh lặp lại thông tin và giải phóng không gian (vì Page Header đã làm nhiệm vụ khai báo tiêu đề trang).
+  - Đối với các phân khu độc lập không dùng Tabs (nếu có), có thể xoá Section Title nếu không thực sự cần thiết, hoặc sử dụng tiêu đề cỡ nhỏ hơn (H3/H4) và bắt buộc **Căn trái (Left-aligned)**. Tuyệt đối không căn giữa các tiêu đề phân khu.
+
+### 4.12. Tiêu chuẩn Card System (3 Cấp độ)
+
+Hệ thống sử dụng đúng **3 loại Card** với mục đích rõ ràng. Tuyệt đối không tạo ra thêm loại card ngoài danh sách này:
+
+| Cấp độ | Tên | Class CSS | Mục đích sử dụng |
+|:--|:--|:--|:--|
+| **Cấp 1** | Content Card | `.topic-card` | Nội dung học tập dạng lưới (Chủ đề từ vựng, Đề luyện thi, ...) |
+| **Cấp 2** | List Row Card | `.grammar-chapter-card` | Danh sách dạng hàng ngang (Chapter ngữ pháp, danh sách bài thi) |
+| **Cấp 3** | Featured Card | `.topic-card.topic-card--featured` | Item được ghim/nổi bật trong lưới (dùng kèm Cấp 1) |
+
+**Quy tắc chung cho mọi loại Card:**
+- **Nền:** Trắng đặc `#FFFFFF`. Tuyệt đối không dùng `rgba(255,255,255,0.01x)` trên nền sáng.
+- **Viền:** `1px solid #E5E5EA`. Không dùng màu viền khác ngoài trạng thái Active/Featured.
+- **Bo góc:** `border-radius: 14px`.
+- **Hover State:** Chỉ nâng nhẹ (`translateY(-3px)`) + viền cam mờ. Không đổi màu nền hay thêm glow sặc sỡ.
+
+**Tiêu chuẩn riêng từng cấp:**
+- **Content Card (Cấp 1):** Min-height `190px`. Footer gạch ngăn `#F0F0F0`. Metadata text dạng badge chữ hoa nhỏ bên trái, CTA button bên phải.
+- **List Row Card (Cấp 2):** Padding header `22px 28px`. Nội dung mở rộng padding `28px`. Gap giữa các row `12px`. Đủ white space để tránh cảm giác ngợp thông tin.
+- **Featured Card (Cấp 3):** Viền `2px` màu Cam Hổ Phách. Label "⭐ NỔI BẬT" uppercase phía trên title. Bóng cam mờ nhẹ. **Không đổi màu chữ title** — vẫn dùng `Text-Primary`.
+
 ---
 
 ## 6. RULES (AUDIT QUESTIONS FOR MASTER UI)

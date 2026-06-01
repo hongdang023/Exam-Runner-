@@ -67,7 +67,7 @@ Văn bản hiển thị trên giao diện (Đề mục, Nút bấm, Tab điều 
 
 #### C. Kiến thức Ngữ pháp (Grammar Knowledge)
 *   **Tên chủ điểm**: Chuẩn xác, song ngữ (Ví dụ: Thì Hiện tại hoàn thành - Present Perfect).
-*   **Công thức (Formula)**: Trực quan, dễ nhớ (Ví dụ: `S + have/has + V3/ed`).
+*   **Công thức (Formula)**: Trực quan, dễ nhớ. **Bắt buộc phân chia rõ ràng cấu trúc dành cho Động từ "to be" và Động từ thường** (đặc biệt với các thì hoặc các cấu trúc có sự khác biệt). (Ví dụ: `S + is/am/are + ...` vs `S + V(s/es) + ...`).
 *   **Cách dùng chính (Usage)**: Gạch đầu dòng các trường hợp dùng phổ biến.
 *   **Ví dụ minh họa (Examples)**: Bắt buộc có ít nhất 1-2 ví dụ thực tế (có dịch nghĩa) cho mỗi cấu trúc/cách dùng.
 *   **Dấu hiệu nhận biết (Signals)**: Các từ khóa đi kèm (Ví dụ: *since, for, already*...).
@@ -105,7 +105,11 @@ Không gian biến việc sửa câu sai thành trải nghiệm thú vị, kích
     *   Trả kết quả Đúng/Sai trực tiếp ngay sau mỗi cú click chọn phương án.
     *   Hiển thị giải thích chi tiết đa tầng (5-step explanation) ngay tại vị trí câu hỏi: *Verdict (Khẳng định đúng sai) -> Rule (Quy tắc cốt lõi) -> Why (Lý do đúng) -> Trap (Bẫy của đề) -> Tip (Mẹo nhớ nhanh)*.
 *   **Gợi nhớ chủ động (Active Recall)**:
-    *   Đối với câu hỏi học sinh trả lời sai, trước khi hệ thống hiển thị đáp án đúng và lời giải thích sâu, hệ thống phải chèn một mini-puzzle (câu hỏi phụ trắc nghiệm nhỏ / Active Recall seed) bắt học sinh phải tự gợi nhớ và chọn quy tắc ngữ pháp hoặc quy luật phát âm cốt lõi liên quan thay vì chỉ đọc giải thích thụ động.
+    *   Đối với câu hỏi học sinh trả lời sai, trước khi hệ thống hiển thị đáp án đúng và lời giải thích sâu, hệ thống phải chèn một mini-puzzle (câu hỏi phụ trắc nghiệm nhỏ / Active Recall seed) bắt học sinh phải tự gợi nhớ và chọn quy tắc thay vì thụ động đọc giải thích.
+    *   **Tiêu chuẩn nội dung câu hỏi Active Recall:**
+        *   **Tính liên kết (Relevance):** Câu hỏi phải bám sát trực tiếp vào "đơn vị kiến thức lõi" (quy tắc ngữ pháp, từ vựng, phát âm) khiến học sinh làm sai câu gốc.
+        *   **Độ gợi mở (Scaffolding):** Câu hỏi mang tính chất dẫn dắt, gợi ý để học sinh tự suy luận ra vấn đề, không đánh đố bằng một câu hỏi khó tương đương.
+        *   **Xoáy sâu vào bản chất:** Các phương án lựa chọn (A, B, C, D) của câu Active Recall nên phản ánh các "tư duy sai lệch phổ biến" (common misconceptions) để triệt để sửa lỗi tư duy của học sinh.
 *   **Bố cục dữ liệu & Giao diện tương thích**:
     *   *One-question-per-screen*: Mỗi màn hình hiển thị duy nhất 1 câu hỏi tạo trạng thái tập trung sâu (Flow state). Học sinh giải quyết xong và hiểu rõ giải thích mới vuốt chuyển sang câu tiếp theo.
     *   *Giao diện dạng thẻ (Card-based)*: Phương án lựa chọn A, B, C, D được thiết kế dưới dạng các block thẻ lớn, trực quan và dễ bấm (Touch-friendly).
@@ -130,7 +134,7 @@ Không gian biến việc sửa câu sai thành trải nghiệm thú vị, kích
 ### B. Tiêu chuẩn Nội dung Chi tiết cho Mỗi Tiểu mục (Sub-topic Content Schema)
 Mỗi tiểu mục học lý thuyết phải chứa đầy đủ các trường thông tin sau trong cơ sở dữ liệu (`exams_db.js`):
 1.  **Tên tiểu mục (Title)**: Song ngữ rõ ràng (Ví dụ: *Hiện tại hoàn thành - Present Perfect*).
-2.  **Công thức tổng quát (Formula)**: Trực quan hóa toán học hóa ngữ pháp (Ví dụ: `S + have/has + V3/ed`).
+2.  **Công thức tổng quát (Formula)**: Trực quan hóa toán học hóa ngữ pháp. **Bắt buộc phân chia cấu trúc thành 2 trường hợp: Với Động từ "to be" và Với Động từ thường** (nếu tiểu mục đó có sự khác biệt, ví dụ như Thì Hiện tại đơn, Quá khứ đơn...).
 3.  **Cách dùng cốt lõi (Core Usage)**: Gạch đầu dòng rõ ràng các ngữ cảnh áp dụng thực tế, lược bỏ rườm rà.
 4.  **Dấu hiệu nhận biết (Signals)**: Danh sách từ khóa trực quan giúp nhận diện tức thì trong đề thi.
 5.  **Ví dụ song ngữ (Dual-language Examples)**: Tối thiểu 2 ví dụ chất lượng cao, phản ánh đúng thực tế ngôn ngữ kèm dịch nghĩa tiếng Việt sát nghĩa.
