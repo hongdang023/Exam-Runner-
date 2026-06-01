@@ -65,6 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Quick streak and counts update
     document.getElementById('streak-count').innerText = `${AppState.streak} ngày`;
     saveAppStateToLocalStorage();
+    
+    // Auto-start tours if needed (only if onboarding is complete)
+    if (typeof Tours !== 'undefined' && localStorage.getItem('ob_completed') === 'true') {
+        if (AppState.currentRole === 'student') {
+            Tours.startStudentTour();
+        } else if (AppState.currentRole === 'parent') {
+            Tours.startParentTour();
+        }
+    }
 });
 
 // --- SIDEBAR PROFILE & EDIT ---
@@ -209,6 +218,10 @@ function initRoleSelector() {
                 setTimeout(() => trigger.classList.remove('animate-zoom'), 300);
                 
                 saveAppStateToLocalStorage();
+                
+                if (typeof Tours !== 'undefined') {
+                    Tours.startStudentTour();
+                }
             }
         });
     });
@@ -479,6 +492,11 @@ function executePendingRoleSwitch() {
     setTimeout(() => triggerButton.classList.remove('animate-zoom'), 300);
 
     saveAppStateToLocalStorage();
+
+    if (typeof Tours !== 'undefined') {
+        if (role === 'parent') Tours.startParentTour();
+        else if (role === 'student') Tours.startStudentTour();
+    }
 
     // Reset pending role switch state
     pendingRoleSwitch = null;
@@ -2606,6 +2624,10 @@ window.startExamPortal = function(examId) {
 
     // Start clock countdown
     AppState.examTimerInterval = setInterval(updateExamClock, 1000);
+    
+    if (typeof Tours !== 'undefined') {
+        Tours.showExamTooltips();
+    }
 };
 
 function renderActiveExamLayout() {
@@ -4970,8 +4992,11 @@ function renderTopicDetailView(container) {
                 
                 <div class="word-cards-list">
                     ${topicWords.length === 0 ? `
-                        <div class="glass-card" style="text-align: center; padding: 48px; color: var(--text-tertiary); border: 1px dashed var(--border-color);">
-                            Chủ đề này chưa có từ vựng nào. Hãy dán văn bản hàng loạt hoặc thêm từ nhanh ở trên!
+                        <div class="glass-card" style="text-align: center; padding: 48px; color: var(--text-tertiary); border: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <span style="font-size: 40px; margin-bottom: 16px;">📭</span>
+                            <h3 style="color: var(--text-primary); margin-bottom: 8px;">Bạn đã ôn hết từ vựng</h3>
+                            <p style="margin-bottom: 24px;">Chủ đề này chưa có từ vựng nào. Hãy thêm từ vựng mới để tiếp tục rèn luyện nhé!</p>
+                            <button class="btn btn-primary" onclick="document.getElementById('topic-add-word').focus()">Khám phá từ vựng mới</button>
                         </div>
                     ` : topicWords.map(w => `
                         <div class="word-card-item">
@@ -8001,7 +8026,9 @@ function saveAppStateToLocalStorage() {
         grammarMastery: AppState.grammarMastery || { tense: 0, passive: 0, conditional: 0, comparison: 0, relative: 0, gerund: 0, connectors: 0, reported_speech: 0, word_form: 0, phrasal_verb: 0 },
         grammarStatus: AppState.grammarStatus || { tense: 'active', passive: 'locked', conditional: 'locked', comparison: 'locked', relative: 'locked', gerund: 'locked', connectors: 'locked', reported_speech: 'locked', word_form: 'locked', phrasal_verb: 'locked' },
         grammarSubTopicsCompleted: AppState.grammarSubTopicsCompleted || {},
-        wordStatuses: AppState.wordStatuses || {}
+        wordStatuses: AppState.wordStatuses || {},
+        hasSeenStudentTour: AppState.hasSeenStudentTour || false,
+        hasSeenParentTour: AppState.hasSeenParentTour || false
     };
     localStorage.setItem('exam_runners_app_state', JSON.stringify(dataToSave));
     
@@ -8052,6 +8079,8 @@ function loadAppStateFromLocalStorage() {
             AppState.grammarStatus = data.grammarStatus || { tense: 'active', passive: 'locked', conditional: 'locked', comparison: 'locked', relative: 'locked', gerund: 'locked', connectors: 'locked', reported_speech: 'locked', word_form: 'locked', phrasal_verb: 'locked' };
             AppState.grammarSubTopicsCompleted = data.grammarSubTopicsCompleted || {};
             AppState.wordStatuses = data.wordStatuses || {};
+            AppState.hasSeenStudentTour = data.hasSeenStudentTour || false;
+            AppState.hasSeenParentTour = data.hasSeenParentTour || false;
             
             // Dynamically resolve and synchronize chapter statuses from masteries
             if (typeof EXAM_RUNNERS_DB !== "undefined" && EXAM_RUNNERS_DB.grammarTimeline) {
@@ -8226,6 +8255,14 @@ function initOnboarding() {
             startCountdownClock();
             if (AppState.currentTab === 'dashboard') {
                 renderDashboard(document.getElementById('app-viewport'));
+            }
+            
+            // Start tour after onboarding is complete
+            if (typeof Tours !== 'undefined') {
+                setTimeout(() => {
+                    if (AppState.currentRole === 'student') Tours.startStudentTour();
+                    else if (AppState.currentRole === 'parent') Tours.startParentTour();
+                }, 500);
             }
         }
     });

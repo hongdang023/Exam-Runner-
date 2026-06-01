@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100..900;1,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
     <!-- Phosphor Icons for premium human-crafted feel -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Driver.js for Onboarding Tours -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="">
@@ -76,6 +78,10 @@
                         <span class="user-role-badge">Chỉnh sửa hồ sơ</span>
                     </div>
                 </div>
+                <!-- On-demand Replay Tour Button -->
+                <button id="replay-tour-btn" style="width:100%; margin-top:8px; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-secondary); font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s;">
+                    <i data-lucide="help-circle" style="width:14px; height:14px;"></i> Xem Lại Hướng Dẫn
+                </button>
             </div>
         </aside>
 
@@ -451,8 +457,11 @@
         </div>
     </div>
 
+    <!-- Driver.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <script src="js/exams_db.js"></script>
     <script src="js/practice_bank.js"></script>
+    <script src="js/tours.js"></script>
     <script src="js/app.js?v=2"></script>
 </body>
 </html>
