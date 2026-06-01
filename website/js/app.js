@@ -1055,19 +1055,19 @@ function renderSkillMap(container) {
         const total = examIds.reduce((sum, id) => sum + AppState.completedExams[id], 0);
         avgExamScore = Math.round(total / examIds.length);
     }
-    const baseScore = avgExamScore > 0 ? avgExamScore : 0; // default to 0 if no exams
+    const baseScore = avgExamScore > 0 ? avgExamScore : 50; // default if no exams
 
     const skills = [
-        { key: "phonetics", title: "Phát Âm", cat: "knowledge", accuracy: baseScore > 0 ? Math.min(100, baseScore + 15) : 0, qCount: 140 },
-        { key: "stress", title: "Trọng Âm", cat: "knowledge", accuracy: baseScore > 0 ? Math.min(100, baseScore + 8) : 0, qCount: 95 },
-        { key: "grammar", title: "Ngữ Pháp", cat: "knowledge", accuracy: baseScore > 0 ? (AppState.grammarAccuracy || baseScore) : 0, qCount: 95 },
-        { key: "synonyms", title: "Từ Vựng", cat: "knowledge", accuracy: baseScore > 0 ? Math.max(0, baseScore - 5) : 0, qCount: 75 },
+        { key: "phonetics", title: "Phát Âm", cat: "knowledge", accuracy: Math.min(100, baseScore + 15), qCount: 140 },
+        { key: "stress", title: "Trọng Âm", cat: "knowledge", accuracy: Math.min(100, baseScore + 8), qCount: 95 },
+        { key: "grammar", title: "Ngữ Pháp", cat: "knowledge", accuracy: AppState.grammarAccuracy || baseScore, qCount: 95 },
+        { key: "synonyms", title: "Từ Vựng", cat: "knowledge", accuracy: Math.max(0, baseScore - 5), qCount: 75 },
         
-        { key: "reading", title: "Đọc Hiểu", cat: "skill", accuracy: baseScore > 0 ? Math.max(0, baseScore - 12) : 0, qCount: 40 },
-        { key: "cloze", title: "Đọc Điền Từ", cat: "skill", accuracy: baseScore > 0 ? Math.max(0, baseScore - 15) : 0, qCount: 50 },
-        { key: "error", title: "Sửa Lỗi Sai", cat: "skill", accuracy: baseScore > 0 ? Math.max(0, baseScore - 8) : 0, qCount: 80 },
+        { key: "reading", title: "Đọc Hiểu", cat: "skill", accuracy: Math.max(0, baseScore - 12), qCount: 40 },
+        { key: "cloze", title: "Đọc Điền Từ", cat: "skill", accuracy: Math.max(0, baseScore - 15), qCount: 50 },
+        { key: "error", title: "Sửa Lỗi Sai", cat: "skill", accuracy: Math.max(0, baseScore - 8), qCount: 80 },
         
-        { key: "communication", title: "Giao Tiếp", cat: "attitude", accuracy: baseScore > 0 ? Math.min(100, baseScore + 10) : 0, qCount: 60 },
+        { key: "communication", title: "Giao Tiếp", cat: "attitude", accuracy: Math.min(100, baseScore + 10), qCount: 60 },
         { key: "mock", title: "Luyện Đề", cat: "attitude", accuracy: examIds.length > 0 ? Math.min(100, examIds.length * 10) : 0, qCount: examIds.length }
     ];
 
@@ -4196,6 +4196,8 @@ window.deleteWordFromTopic = function(topicId, wordId) {
     
     if (topicId === 'all') {
         if (confirm("Bạn có chắc chắn muốn xóa từ vựng này vĩnh viễn khỏi mọi chủ đề không?")) {
+            if (!AppState.deletedFlashcardIds) AppState.deletedFlashcardIds = [];
+            AppState.deletedFlashcardIds.push(parsedId);
             AppState.flashcards = AppState.flashcards.filter(w => w.id !== parsedId);
             AppState.topics.forEach(t => {
                 t.words = t.words.filter(id => id !== parsedId);
@@ -4347,6 +4349,8 @@ window.submitVocabForm = function(event) {
 window.deleteWordGlobally = function(wordId) {
     const parsedId = isNaN(wordId) ? wordId : Number(wordId);
     if (confirm("Bạn có chắc chắn muốn xóa từ vựng này vĩnh viễn không?")) {
+        if (!AppState.deletedFlashcardIds) AppState.deletedFlashcardIds = [];
+        AppState.deletedFlashcardIds.push(parsedId);
         AppState.flashcards = AppState.flashcards.filter(w => w.id !== parsedId);
         AppState.topics.forEach(t => {
             t.words = t.words.filter(id => id !== parsedId);
@@ -7982,6 +7986,7 @@ function saveAppStateToLocalStorage() {
         examFlags: AppState.examFlags || {},
         examStrikethroughs: AppState.examStrikethroughs || {},
         flashcards: AppState.flashcards || [],
+        deletedFlashcardIds: AppState.deletedFlashcardIds || [],
         topics: AppState.topics || [],
         deletedTopicIds: AppState.deletedTopicIds || [],
         grammarAccuracy: AppState.grammarAccuracy !== undefined ? AppState.grammarAccuracy : 0,
@@ -8069,27 +8074,28 @@ function loadAppStateFromLocalStorage() {
                 });
             }
             AppState.flashcards = data.flashcards || [...EXAM_RUNNERS_DB.flashcards];
+            AppState.deletedFlashcardIds = data.deletedFlashcardIds || [];
             AppState.topics = data.topics || [...EXAM_RUNNERS_DB.topics];
             AppState.deletedTopicIds = data.deletedTopicIds || [];
             
-            if (typeof EXAM_RUNNERS_DB !== "undefined") {
-                if (EXAM_RUNNERS_DB.topics) {
-                    EXAM_RUNNERS_DB.topics.forEach(dt => {
-                        if (AppState.deletedTopicIds.includes(dt.id)) return;
-                        const exists = AppState.topics.some(t => t.id === dt.id);
-                        if (!exists) {
-                            AppState.topics.push(dt);
-                        }
-                    });
-                }
-                if (EXAM_RUNNERS_DB.flashcards) {
-                    EXAM_RUNNERS_DB.flashcards.forEach(df => {
-                        const exists = AppState.flashcards.some(f => f.id === df.id);
-                        if (!exists) {
-                            AppState.flashcards.push(df);
-                        }
-                    });
-                }
+            if (typeof EXAM_RUNNERS_DB !== "undefined" && EXAM_RUNNERS_DB.topics) {
+                EXAM_RUNNERS_DB.topics.forEach(dt => {
+                    if (AppState.deletedTopicIds.includes(dt.id)) return;
+                    const exists = AppState.topics.some(t => t.id === dt.id);
+                    if (!exists) {
+                        AppState.topics.push(dt);
+                    }
+                });
+            }
+
+            if (typeof EXAM_RUNNERS_DB !== "undefined" && EXAM_RUNNERS_DB.flashcards) {
+                EXAM_RUNNERS_DB.flashcards.forEach(df => {
+                    if (AppState.deletedFlashcardIds.includes(df.id)) return;
+                    const exists = AppState.flashcards.some(f => f.id === df.id);
+                    if (!exists) {
+                        AppState.flashcards.push(df);
+                    }
+                });
             }
         } catch (e) {
             console.error("Error parsing AppState from localStorage", e);
