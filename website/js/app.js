@@ -892,16 +892,24 @@ function renderDashboard(container) {
 
 // --- A2. COMPACT SKILL MAP SUMMARY (for Dashboard Overview) ---
 function renderSkillMapSummary(container) {
+    let avgExamScore = 0;
+    const examIds = Object.keys(AppState.completedExams || {});
+    if (examIds.length > 0) {
+        const total = examIds.reduce((sum, id) => sum + AppState.completedExams[id], 0);
+        avgExamScore = Math.round(total / examIds.length);
+    }
+    const baseScore = avgExamScore > 0 ? avgExamScore : 0; // default to 0 if no exams
+
     const skills = [
-        { key: "phonetics", title: "Phát Âm", accuracy: 95 },
-        { key: "stress", title: "Trọng Âm", accuracy: 88 },
-        { key: "grammar", title: "Ngữ Pháp", accuracy: AppState.grammarAccuracy || 74 },
-        { key: "synonyms", title: "Từ Vựng", accuracy: 78 },
-        { key: "reading", title: "Đọc Hiểu", accuracy: 68 },
-        { key: "cloze", title: "Đọc Điền Từ", accuracy: 62 },
-        { key: "error", title: "Sửa Lỗi Sai", accuracy: 72 },
-        { key: "communication", title: "Giao Tiếp", accuracy: 85 },
-        { key: "mock", title: "Luyện Đề", accuracy: Object.keys(AppState.completedExams).length > 0 ? Math.min(100, Object.keys(AppState.completedExams).length * 10) : 0 }
+        { key: "phonetics", title: "Phát Âm", accuracy: baseScore > 0 ? Math.min(100, baseScore + 15) : 0 },
+        { key: "stress", title: "Trọng Âm", accuracy: baseScore > 0 ? Math.min(100, baseScore + 8) : 0 },
+        { key: "grammar", title: "Ngữ Pháp", accuracy: baseScore > 0 ? (AppState.grammarAccuracy || baseScore) : 0 },
+        { key: "synonyms", title: "Từ Vựng", accuracy: baseScore > 0 ? Math.max(0, baseScore - 5) : 0 },
+        { key: "reading", title: "Đọc Hiểu", accuracy: baseScore > 0 ? Math.max(0, baseScore - 12) : 0 },
+        { key: "cloze", title: "Đọc Điền Từ", accuracy: baseScore > 0 ? Math.max(0, baseScore - 15) : 0 },
+        { key: "error", title: "Sửa Lỗi Sai", accuracy: baseScore > 0 ? Math.max(0, baseScore - 8) : 0 },
+        { key: "communication", title: "Giao Tiếp", accuracy: baseScore > 0 ? Math.min(100, baseScore + 10) : 0 },
+        { key: "mock", title: "Luyện Đề", accuracy: examIds.length > 0 ? Math.min(100, examIds.length * 10) : 0 }
     ];
 
     const totalScore = skills.reduce((sum, s) => sum + Math.round((s.accuracy / 100) * 3), 0);
@@ -1055,19 +1063,19 @@ function renderSkillMap(container) {
         const total = examIds.reduce((sum, id) => sum + AppState.completedExams[id], 0);
         avgExamScore = Math.round(total / examIds.length);
     }
-    const baseScore = avgExamScore > 0 ? avgExamScore : 50; // default if no exams
+    const baseScore = avgExamScore > 0 ? avgExamScore : 0; // default to 0 if no exams
 
     const skills = [
-        { key: "phonetics", title: "Phát Âm", cat: "knowledge", accuracy: Math.min(100, baseScore + 15), qCount: 140 },
-        { key: "stress", title: "Trọng Âm", cat: "knowledge", accuracy: Math.min(100, baseScore + 8), qCount: 95 },
-        { key: "grammar", title: "Ngữ Pháp", cat: "knowledge", accuracy: AppState.grammarAccuracy || baseScore, qCount: 95 },
-        { key: "synonyms", title: "Từ Vựng", cat: "knowledge", accuracy: Math.max(0, baseScore - 5), qCount: 75 },
+        { key: "phonetics", title: "Phát Âm", cat: "knowledge", accuracy: baseScore > 0 ? Math.min(100, baseScore + 15) : 0, qCount: 140 },
+        { key: "stress", title: "Trọng Âm", cat: "knowledge", accuracy: baseScore > 0 ? Math.min(100, baseScore + 8) : 0, qCount: 95 },
+        { key: "grammar", title: "Ngữ Pháp", cat: "knowledge", accuracy: baseScore > 0 ? (AppState.grammarAccuracy || baseScore) : 0, qCount: 95 },
+        { key: "synonyms", title: "Từ Vựng", cat: "knowledge", accuracy: baseScore > 0 ? Math.max(0, baseScore - 5) : 0, qCount: 75 },
         
-        { key: "reading", title: "Đọc Hiểu", cat: "skill", accuracy: Math.max(0, baseScore - 12), qCount: 40 },
-        { key: "cloze", title: "Đọc Điền Từ", cat: "skill", accuracy: Math.max(0, baseScore - 15), qCount: 50 },
-        { key: "error", title: "Sửa Lỗi Sai", cat: "skill", accuracy: Math.max(0, baseScore - 8), qCount: 80 },
+        { key: "reading", title: "Đọc Hiểu", cat: "skill", accuracy: baseScore > 0 ? Math.max(0, baseScore - 12) : 0, qCount: 40 },
+        { key: "cloze", title: "Đọc Điền Từ", cat: "skill", accuracy: baseScore > 0 ? Math.max(0, baseScore - 15) : 0, qCount: 50 },
+        { key: "error", title: "Sửa Lỗi Sai", cat: "skill", accuracy: baseScore > 0 ? Math.max(0, baseScore - 8) : 0, qCount: 80 },
         
-        { key: "communication", title: "Giao Tiếp", cat: "attitude", accuracy: Math.min(100, baseScore + 10), qCount: 60 },
+        { key: "communication", title: "Giao Tiếp", cat: "attitude", accuracy: baseScore > 0 ? Math.min(100, baseScore + 10) : 0, qCount: 60 },
         { key: "mock", title: "Luyện Đề", cat: "attitude", accuracy: examIds.length > 0 ? Math.min(100, examIds.length * 10) : 0, qCount: examIds.length }
     ];
 
